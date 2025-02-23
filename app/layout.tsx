@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { MainHeader } from "@/mycomponents/headers/header";
+import { ThemeProvider } from "./context/Theme";
+import { AuthProvider } from "./context/Auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,9 +28,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen w-screen`}
       >
-        {children}
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <main className="h-[100%]">
+              <div className="h-[10%]">
+                <MainHeader />
+              </div>
+              <div className="h-[90%]">{children}</div>
+            </main>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
