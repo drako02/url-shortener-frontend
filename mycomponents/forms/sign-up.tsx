@@ -33,8 +33,8 @@ const formSchema = z.object({
       "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
     ),
 });
-export const SigninForm = () => {
-  const { signIn, user } = useAuth();
+export const SignUpForm = () => {
+  const { createAccount, user, signIn } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,7 +48,8 @@ export const SigninForm = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const { email, password } = values;
-    await signIn({ option: "email_password", email, password });
+    // await signIn({option: "email_password", email, password});
+    await createAccount(email, password);
     router.push("/home");
     console.log("submitted");
   };
@@ -59,7 +60,7 @@ export const SigninForm = () => {
   };
   return (
     <div className="w-[360px] ">
-      <p className="text-[28px] text-center font-medium"> Sign in here</p>
+      <p className="text-[28px] text-center font-medium"> Sign up here</p>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -72,7 +73,7 @@ export const SigninForm = () => {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter email" />
+                  <Input placeholder="Enter email" {...field} />
                 </FormControl>
                 {fieldState.error && (
                   <p className="text-sm text-red-500 mt-1">
@@ -89,7 +90,11 @@ export const SigninForm = () => {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter password" />
+                  <Input
+                    type="password"
+                    placeholder="Enter password"
+                    {...field}
+                  />
                 </FormControl>
                 {fieldState.error && (
                   <p className="text-sm text-red-500 mt-1">
@@ -102,7 +107,7 @@ export const SigninForm = () => {
           <div className="flex justify-start items-center">
             <Button type="submit" className=" mt-[20px]">
               {" "}
-              Sign in
+              Sign up
             </Button>
           </div>
         </form>
@@ -117,11 +122,12 @@ export const SigninForm = () => {
           <Image alt="" src={googleIcon} className="h-[24px] w-[24px]" /> Google{" "}
         </Button>
       </div>
-      {/* <div> */}
-        <Link href="/sign-up" className="text-gray-500 text-sm underline flex justify-center mt-5">
-          Don't have an account? Sign up here
-        </Link>
-      {/* </div> */}
+      <Link
+        href="/sign-in"
+        className="text-gray-500 text-sm underline flex justify-center mt-5"
+      >
+        Already have an account? Sign in here
+      </Link>
     </div>
   );
 };

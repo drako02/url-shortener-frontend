@@ -6,6 +6,7 @@ import {
   create_with_email_password,
   sign_in_email_password,
   signInUserWithGooglePopup,
+  signUserOut,
 } from "@/lib/services/auth";
 
 type SignIn =
@@ -21,6 +22,7 @@ type AuthContextProps = {
   signIn: (props: SignIn) => Promise<void>;
   createAccount: (email: string, password: string) => Promise<void>;
   authenticating: boolean;
+  signOut: () => Promise<void>
 };
 
 export const AuthContext = React.createContext<AuthContextProps>({
@@ -28,15 +30,17 @@ export const AuthContext = React.createContext<AuthContextProps>({
   signIn: async () => undefined,
   createAccount: async () => undefined,
   authenticating: false,
+  signOut: async () => undefined,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | undefined>(undefined);
-  const [authenticating, setAuthenticating] = useState<boolean>(false);
+  const [authenticating, setAuthenticating] = useState<boolean>(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user || undefined);
+      setAuthenticating(false);
     });
 
     return () => unsubscribe();
@@ -55,6 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error) {
       console.error(error);
+      throw error
       //do something
     } finally {
       setAuthenticating(false);
@@ -67,15 +72,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await create_with_email_password(email, password);
     } catch (error) {
       console.error("Account creation error:", error);
+      throw error
       //do something
     } finally {
       setAuthenticating(false);
     }
   };
 
+  const signOut = async () => {
+    await signUserOut();
+  }
   return (
     <AuthContext.Provider
-      value={{ user, signIn, createAccount, authenticating }}
+      value={{ user, signIn, createAccount, authenticating, signOut }}
     >
       {children}
     </AuthContext.Provider>

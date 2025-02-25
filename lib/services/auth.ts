@@ -4,6 +4,7 @@ import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
+  signOut
 } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 
@@ -49,4 +50,13 @@ export const signInUserWithGooglePopup = async () => {
     throw error;
   }
 };
+
+export const signUserOut = async() => {
+  try{
+    await signOut(auth);
+  } catch(error){
+    console.error("Failed to sign user out:, ", error);
+    throw error;
+  }
+}
 
