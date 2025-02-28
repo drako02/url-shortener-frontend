@@ -19,8 +19,8 @@ type SignIn =
 
 type AuthContextProps = {
   user: User | undefined;
-  signIn: (props: SignIn) => Promise<void>;
-  createAccount: (email: string, password: string) => Promise<void>;
+  signIn: (props: SignIn) => Promise<User | undefined>;
+  createAccount: (email: string, password: string) => Promise<User | undefined>;
   authenticating: boolean;
   signOut: () => Promise<void>
 };
@@ -46,16 +46,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => unsubscribe();
   }, [auth]);
 
-  const signIn = async (props: SignIn) => {
+  const signIn = async (props: SignIn): Promise<User> => {
     try {
       const { option } = props;
       setAuthenticating(true);
       if (option === "email_password") {
         const { email, password } = props;
 
-        await sign_in_email_password(email, password);
+        return sign_in_email_password(email, password);
+
       } else {
-        await signInUserWithGooglePopup();
+        return signInUserWithGooglePopup();
       }
     } catch (error) {
       console.error(error);
@@ -66,10 +67,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const createAccount = async (email: string, password: string) => {
+  const createAccount = async (email: string, password: string):Promise<User> => {
     try {
       setAuthenticating(true);
-      await create_with_email_password(email, password);
+      return create_with_email_password(email, password);
     } catch (error) {
       console.error("Account creation error:", error);
       throw error

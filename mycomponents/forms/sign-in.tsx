@@ -16,6 +16,11 @@ import googleIcon from "@/public/icons/google.svg";
 import { useAuth } from "@/app/context/Auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { addUser } from "@/api/users/add";
+import { useState } from "react";
+import { LoadingScreen } from "../loaders/loading";
+import { toast } from "sonner";
+import { FirebaseError } from "firebase/app";
 
 const formSchema = z.object({
   email: z
@@ -34,6 +39,7 @@ const formSchema = z.object({
     ),
 });
 export const SigninForm = () => {
+  const [loading, setLoading] = useState<boolean>(false);
   const { signIn, user } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,16 +53,44 @@ export const SigninForm = () => {
   const router = useRouter();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const { email, password } = values;
-    await signIn({ option: "email_password", email, password });
-    router.push("/home");
-    console.log("submitted");
+    try {
+      setLoading(true);
+      const { email, password } = values;
+      await signIn({ option: "email_password", email, password });
+      router.push("/home");
+      console.log("submitted");
+    } catch (error) {
+      console.error("Failed to sign in", error);
+      const errMessage =
+        error instanceof FirebaseError ? error.message : "Something went wrong";
+      toast(`${errMessage}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onGoogleSignIn = async () => {
-    await signIn({ option: "google" });
-    router.push("/home");
+    try {
+      setLoading(true);
+      const newUser = await signIn({ option: "google" });
+      if (!newUser) {
+        return;
+      }
+      await addUser({ uid: newUser.uid });
+      router.push("/home");
+    } catch (error) {
+      console.error("Failed to sign user up", error);
+      const errMessage =
+      error instanceof FirebaseError ? error.message : "Something went wrong";
+    toast(`${errMessage}`);
+      return;
+    } finally {
+      setLoading(false);
+    }
   };
+  if (loading) {
+    return <LoadingScreen />;
+  }
   return (
     <div className="w-[360px] ">
       <p className="text-[28px] text-center font-medium"> Sign in here</p>
@@ -72,7 +106,7 @@ export const SigninForm = () => {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter email" />
+                  <Input placeholder="Enter email" type="email" {...field} />
                 </FormControl>
                 {fieldState.error && (
                   <p className="text-sm text-red-500 mt-1">
@@ -89,7 +123,11 @@ export const SigninForm = () => {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter password" />
+                  <Input
+                    placeholder="Enter password"
+                    type="password"
+                    {...field}
+                  />
                 </FormControl>
                 {fieldState.error && (
                   <p className="text-sm text-red-500 mt-1">
@@ -118,9 +156,12 @@ export const SigninForm = () => {
         </Button>
       </div>
       {/* <div> */}
-        <Link href="/sign-up" className="text-gray-500 text-sm underline flex justify-center mt-5">
-          Don't have an account? Sign up here
-        </Link>
+      <Link
+        href="/sign-up"
+        className="text-gray-500 text-sm underline flex justify-center mt-5"
+      >
+        Don't have an account? Sign up here
+      </Link>
       {/* </div> */}
     </div>
   );

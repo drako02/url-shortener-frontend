@@ -16,6 +16,10 @@ import googleIcon from "@/public/icons/google.svg";
 import { useAuth } from "@/app/context/Auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { addUser } from "@/api/users/add";
+import { useState } from "react";
+import { toast } from "sonner";
+import { FirebaseError } from "firebase/app";
 
 const formSchema = z.object({
   email: z
@@ -34,6 +38,8 @@ const formSchema = z.object({
     ),
 });
 export const SignUpForm = () => {
+  const [loading, setLoading] = useState<boolean>(false);
+
   const { createAccount, user, signIn } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,19 +54,36 @@ export const SignUpForm = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const { email, password } = values;
-    // await signIn({option: "email_password", email, password});
-    await createAccount(email, password);
-    router.push("/home");
-    console.log("submitted");
+    try {
+      const newUser = await createAccount(email, password);
+      if (!newUser) {
+        return;
+      }
+      await addUser({ uid: newUser.uid });
+      router.push("/home");
+      console.log("submitted");
+    } catch (error) {
+      console.error("Failed to sign up", error);
+      const errMessage =
+        error instanceof FirebaseError ? error.message : "Something went wrong";
+      toast(`${errMessage}`);
+    } finally{
+      setLoading(false)
+    }
   };
 
   const onGoogleSignIn = async () => {
-    await signIn({ option: "google" });
+    const newUser = await signIn({ option: "google" });
+    if (!newUser) {
+      return;
+    }
+    const res = await addUser({ uid: newUser.uid });
+    console.log({ res });
     router.push("/home");
   };
   return (
     <div className="w-[360px] ">
-      <p className="text-[28px] text-center font-medium"> Sign up here</p>
+      <p className="text-[28px] text-center font-medium"> Create an account</p>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}

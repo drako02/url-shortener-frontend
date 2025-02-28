@@ -4,6 +4,7 @@ import "./globals.css";
 import { MainHeader } from "@/mycomponents/headers/header";
 import { ThemeProvider } from "./context/Theme";
 import { AuthProvider } from "./context/Auth";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default function RootLayout({
               </div>
               <div className="h-[90%]">{children}</div>
             </main>
+            <Toaster />
           </ThemeProvider>
         </AuthProvider>
       </body>
