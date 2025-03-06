@@ -1,5 +1,5 @@
 "use client";
-import { useAuth } from "@/app/context/Auth";
+import { useAuth } from "@/context/Auth";
 import { Button } from "@/components/ui/button";
 import {
   Menubar,
@@ -10,11 +10,12 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import { Menu } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
+import { useState } from "react";
 
 const pathToShowSignIn = "/";
 const pathToShowNothing = ["/sign-in", "/sign-up"];
-
 export const MainHeader = () => {
   const pathName = usePathname();
   const showSignIn = pathName === pathToShowSignIn;
@@ -22,7 +23,8 @@ export const MainHeader = () => {
   const router = useRouter();
   const { signOut } = useAuth();
   return (
-    <div className="header-container w-full h-[100%] flex justify-center items-center ">
+    <div className="header-container w-full pt-[1em] pb-[1em] flex flex-shrink-0  justify-center items-center ">
+
       <Menubar>
         <MenubarMenu>
           <MenubarTrigger>Home</MenubarTrigger>

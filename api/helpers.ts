@@ -3,6 +3,9 @@ interface RequestOptions {
   headers?: HeadersInit;
   body?: Record<string, any>;
 }
+
+export const BASE_API_URL = "http://localhost:8080";
+
 export const request = async <T>(
   url: string,
   options: RequestOptions
@@ -24,7 +27,9 @@ export const request = async <T>(
 
     const contentType = response.headers.get("content-type");
     if (contentType?.includes("application/json")) {
-      return response.json();
+      const jsonResponse = await response.json();
+      console.log(jsonResponse);
+      return jsonResponse;
     }
     return response.text() as Promise<T>;
   } catch (error) {

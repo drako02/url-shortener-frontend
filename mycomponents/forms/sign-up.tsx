@@ -10,16 +10,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { z } from "zod";
 import googleIcon from "@/public/icons/google.svg";
-import { useAuth } from "@/app/context/Auth";
+import { useAuth } from "@/context/Auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { addUser } from "@/api/users/add";
 import { useState } from "react";
 import { toast } from "sonner";
 import { FirebaseError } from "firebase/app";
+import { LoadingScreen } from "../loaders/loading";
 
 const formSchema = z.object({
   email: z
@@ -55,17 +56,17 @@ export const SignUpForm = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const { email, password } = values;
     try {
-      const newUser = await createAccount(email, password);
-      if (!newUser) {
+      setLoading(true)
+      const uid = await createAccount(email, password);
+      if (!uid) {
         return;
       }
-      await addUser({ uid: newUser.uid });
       router.push("/home");
       console.log("submitted");
     } catch (error) {
       console.error("Failed to sign up", error);
       const errMessage =
-        error instanceof FirebaseError ? error.message : "Something went wrong";
+        error instanceof Error ? error.message : "Something went wrong";
       toast(`${errMessage}`);
     } finally{
       setLoading(false)
@@ -73,14 +74,29 @@ export const SignUpForm = () => {
   };
 
   const onGoogleSignIn = async () => {
-    const newUser = await signIn({ option: "google" });
-    if (!newUser) {
-      return;
+    try{
+      setLoading(true)
+      const uid = await signIn({ option: "google" });
+      if (!uid) {
+        return;
+      }
+      // console.log({ res: JSON.stringify(res) });
+      router.push("/home");
+    } catch(error){
+      console.error("Failed to sign up with google", error);
+      const errMessage =
+        error instanceof Error ? error.message : "Something went wrong";
+      toast(`${errMessage}`);
+    } finally{
+      setLoading(false)
     }
-    const res = await addUser({ uid: newUser.uid });
-    console.log({ res });
-    router.push("/home");
+
   };
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+  
   return (
     <div className="w-[360px] ">
       <p className="text-[28px] text-center font-medium"> Create an account</p>

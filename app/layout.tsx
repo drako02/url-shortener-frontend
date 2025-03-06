@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { MainHeader } from "@/mycomponents/headers/header";
-import { ThemeProvider } from "./context/Theme";
-import { AuthProvider } from "./context/Auth";
+import { ThemeProvider } from "../context/Theme";
+import { AuthProvider } from "../context/Auth";
 import { Toaster } from "@/components/ui/sonner";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,9 +28,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen w-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col h-full`}
       >
         <AuthProvider>
           <ThemeProvider
@@ -38,11 +39,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <main className="h-[100%]">
-              <div className="h-[10%]">
-                <MainHeader />
-              </div>
-              <div className="h-[90%]">{children}</div>
+            <MainHeader  />
+            <main className="flex-grow overflow-hidden">
+              {children}
             </main>
             <Toaster />
           </ThemeProvider>

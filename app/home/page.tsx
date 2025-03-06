@@ -1,9 +1,8 @@
+"use client";
 
-"use client"
-export default function HomeScreen(){
-    return(
-        <div>
-            <p className="text-[32px]"> Welcome to your home page</p>
-        </div>
-    )
+import { UserHomepage } from "@/mycomponents/pages/home/page";
+import { useAuth } from "../../context/Auth";
+
+export default function HomeScreen() {
+  return <></>;
 }

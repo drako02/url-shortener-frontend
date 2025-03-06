@@ -12,14 +12,14 @@ const provider = new GoogleAuthProvider();
 
 export const create_with_email_password = async (email: string, password: string) => {
   try {
+    auth
     const userCredentials = await createUserWithEmailAndPassword(
       auth,
       email,
       password
     );
 
-    const user = userCredentials.user;
-    return user;
+    return userCredentials.user;
   } catch (error) {
     console.error("Failed to create user:, ", error);
     throw error;
@@ -33,8 +33,7 @@ export const sign_in_email_password = async (email: string, password: string) =>
       email,
       password
     );
-    const user = userCredentials.user;
-    return user;
+    return userCredentials.user;
   } catch (error) {
     console.error("Failed to sign in user:, ", error);
     throw error;

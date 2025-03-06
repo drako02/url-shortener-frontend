@@ -13,7 +13,7 @@ import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import googleIcon from "@/public/icons/google.svg";
-import { useAuth } from "@/app/context/Auth";
+import { useAuth } from "@/context/Auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { addUser } from "@/api/users/add";
@@ -62,7 +62,7 @@ export const SigninForm = () => {
     } catch (error) {
       console.error("Failed to sign in", error);
       const errMessage =
-        error instanceof FirebaseError ? error.message : "Something went wrong";
+        error instanceof Error ? error.message : "Something went wrong";
       toast(`${errMessage}`);
     } finally {
       setLoading(false);
@@ -76,21 +76,23 @@ export const SigninForm = () => {
       if (!newUser) {
         return;
       }
-      await addUser({ uid: newUser.uid });
+      // await addUser({ uid: newUser.uid });
       router.push("/home");
     } catch (error) {
       console.error("Failed to sign user up", error);
       const errMessage =
-      error instanceof FirebaseError ? error.message : "Something went wrong";
-    toast(`${errMessage}`);
+        error instanceof Error ? error.message : "Something went wrong";
+      toast(`${errMessage}`);
       return;
     } finally {
       setLoading(false);
     }
   };
+
   if (loading) {
     return <LoadingScreen />;
   }
+  
   return (
     <div className="w-[360px] ">
       <p className="text-[28px] text-center font-medium"> Sign in here</p>
