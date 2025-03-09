@@ -3,7 +3,10 @@ import { useAuth } from "@/context/Auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LoadingScreen } from "@/mycomponents/loaders/loading";
-import { AppSidebar, SideListOptions } from "@/mycomponents/side-panels/side-panel";
+import {
+  AppSidebar,
+  SideListOptions,
+} from "@/mycomponents/side-panels/side-panel";
 import { Home, Link, PlusCircle, Settings, User } from "lucide-react";
 
 export default function HomeLayout({
@@ -11,53 +14,81 @@ export default function HomeLayout({
 }: {
   children: React.ReactNode;
 }) {
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    };
+    
+    const handlePopState = () => {
+      window.location.reload();
+    };
+    
+    window.addEventListener("pageshow", handlePageShow);
+    window.addEventListener("popstate", handlePopState);
+    // window.addEventListener("pageshow", handlePageShow);
+    
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, []);
+
   const { user, initializing } = useAuth();
   const router = useRouter();
   useEffect(() => {
-    if (!user && !initializing) {
-      router.push("/sign-in");
-    }
+
+    console.log("Auth condition user: ", user)
+    // if (!user && !initializing) {
+    //   router.push("/sign-in");
+    // }
   }, [initializing, router, user]);
 
   if (initializing) return <LoadingScreen />;
 
-  if (!user) return <LoadingScreen />;
+  if (!initializing && !user) {
+    // router.push("/sign-in");
+    return <LoadingScreen />; // Show loading during redirect
+  }
+
+  // if (initializing) return <LoadingScreen />;
+
+  // if (!user) return <LoadingScreen />;
 
   const sideBarOptions: { title: string; options: SideListOptions[] }[] = [
     {
-        title: "Main",
-        options: [
-            {
-                name: "Dashboard",
-                icon: <Home size={18} />,
-                // active: true
-            },
-            {
-                name: "My URLs",
-                icon: <Link size={18} />
-            },
-            {
-                name: "Create URL",
-                icon: <PlusCircle size={18} />,
-                url: "/home/create"
-            },
-        ]
+      title: "Main",
+      options: [
+        {
+          name: "Dashboard",
+          icon: <Home size={18} />,
+        },
+        {
+          name: "My URLs",
+          icon: <Link size={18} />,
+          url: "/home/user-urls",
+        },
+        {
+          name: "Create URL",
+          icon: <PlusCircle size={18} />,
+          url: "/home/create",
+        },
+      ],
     },
     {
-        title: "Account",
-        options: [
-            {
-                name: "Profile",
-                icon: <User size={18} />
-            },
-            {
-                name: "Settings",
-                icon: <Settings size={18} />
-            },
-        ]
-    }
-]
-
+      title: "Account",
+      options: [
+        {
+          name: "Profile",
+          icon: <User size={18} />,
+        },
+        {
+          name: "Settings",
+          icon: <Settings size={18} />,
+        },
+      ],
+    },
+  ];
 
   return (
     <div className="h-full w-full flex ">

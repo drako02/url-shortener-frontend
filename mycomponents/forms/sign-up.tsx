@@ -16,11 +16,12 @@ import googleIcon from "@/public/icons/google.svg";
 import { useAuth } from "@/context/Auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { addUser } from "@/api/users/add";
+import { addUser } from "@/app/api/users/add";
 import { useState } from "react";
 import { toast } from "sonner";
 import { FirebaseError } from "firebase/app";
 import { LoadingScreen } from "../loaders/loading";
+import { AuthLoader } from "../loaders/authloading";
 
 const formSchema = z.object({
   email: z
@@ -94,7 +95,7 @@ export const SignUpForm = () => {
   };
 
   if (loading) {
-    return <LoadingScreen />;
+    return <AuthLoader />;
   }
   
   return (

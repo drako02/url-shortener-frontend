@@ -1,6 +1,6 @@
 "use client";
-import { BASE_API_URL } from "@/api/helpers";
-import { createShortUrl } from "@/api/urls/urls";
+import { BASE_API_URL } from "@/app/api/helpers";
+import { createShortUrl } from "@/app/api/urls/urls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/Auth";

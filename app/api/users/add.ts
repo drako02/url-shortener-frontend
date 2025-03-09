@@ -1,5 +1,7 @@
 import { BASE_API_URL, request } from "../helpers";
 import { UserResponse } from "../types";
+// import { headers } from "next/headers";
+import { NextRequest } from "next/server";
 
 type AddUserRequest = {
   first_name?: string;
@@ -7,8 +9,6 @@ type AddUserRequest = {
   uid: string;
   email: string;
 };
-
-
 
 export async function addUser(payload: AddUserRequest) {
   const { first_name, last_name, uid, email } = payload;
@@ -45,7 +45,16 @@ export const userExists = async (email: string): Promise<boolean> => {
   return res.result;
 };
 
-export const getUser = async (uid: string) => {
-  const user = await request<UserResponse>(`${BASE_API_URL}/users/${uid}`,{});
-  return user
+export const getUser = async (uid: string, idToken: string) => {
+  // const request = NextRequest()
+  // const headersList = await headers();
+  const headers: Record<string, string> = {};
+  if (idToken) {
+    headers.Authorization = `Bearer ${idToken}`;
+  }
+
+  const user = await request<UserResponse>(`${BASE_API_URL}/users/${uid}`, {
+    headers,
+  });
+  return user;
 };

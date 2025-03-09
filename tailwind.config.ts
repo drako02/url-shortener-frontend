@@ -11,6 +11,11 @@ export default {
   ],
   theme: {
   	extend: {
+		backgroundImage: {
+			'signup-image': "url(/images/image-new.png)",
+			'signin-image': "url(/images/image-in.png)",
+
+		  },
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

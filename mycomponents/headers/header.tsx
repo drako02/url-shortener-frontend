@@ -16,14 +16,18 @@ import { useState } from "react";
 
 const pathToShowSignIn = "/";
 const pathToShowNothing = ["/sign-in", "/sign-up"];
+const pathToHide = ["/sign-in", "/sign-up"];
+
 export const MainHeader = () => {
   const pathName = usePathname();
   const showSignIn = pathName === pathToShowSignIn;
   const showNothing = pathToShowNothing.includes(pathName);
+
+  const hidden = pathToHide.includes(pathName)
   const router = useRouter();
   const { signOut } = useAuth();
   return (
-    <div className="header-container w-full pt-[1em] pb-[1em] flex flex-shrink-0  justify-center items-center ">
+    <div className={`${hidden?"hidden": ""} header-container w-full pt-[1em] pb-[1em] flex flex-shrink-0  justify-center items-center `}>
 
       <Menubar>
         <MenubarMenu>
@@ -60,8 +64,8 @@ export const MainHeader = () => {
         <Button
           variant="default"
           className=" login_b absolute right-5 bg-black text-white"
-          onClick={() => {
-            signOut()
+          onClick={async () => {
+           await  signOut()
             router.push("/sign-in")
           }}
         >
