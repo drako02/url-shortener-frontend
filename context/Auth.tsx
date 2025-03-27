@@ -1,5 +1,5 @@
 "use client";
-import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import React, { useContext, useEffect, useState } from "react";
 import { auth } from "@/firebaseConfig";
 import {
@@ -10,8 +10,8 @@ import {
 } from "@/lib/services/auth";
 import { addUser, getUser } from "@/app/api/users/add";
 import { parseDisplayName } from "@/lib/helpers";
-import { User, UserResponse } from "@/app/api/types";
-import { getCookie } from "@/app/api/users/get";
+import { User } from "@/app/api/types";
+// import { getCookie } from "@/app/api/users/get";
 import { mapToUser } from "@/app/api/helpers";
 import { UserContext } from "./User";
 
@@ -96,22 +96,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { email, password } = props;
         const firebaseUser = await sign_in_email_password(email, password);
 
-        const idToken = await firebaseUser.getIdToken();
-        // const res = await fetch("/api/auth", {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify({ idToken , uid: firebaseUser.uid}),
-        // });
-        // // console.log(await res.json())
-
-        // if (!res.ok) {
-        //   const errorData = await res.json();
-        //   throw new Error(
-        //     `Authentication failed: ${errorData.message || res.statusText}`
-        //   );
-        // }
+        const idToken = await firebaseUser.getIdToken(true);
+        console.log("TTTTOOOOKKKKEEENNN: ", idToken)
         await saveTokenAndUid(firebaseUser.uid, idToken);
         const user = await getUser(firebaseUser.uid, idToken);
         setUser(mapToUser(user));
@@ -187,6 +173,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       method: "DELETE",
       credentials: "include",
     });
+    localStorage.removeItem("recentUrls")
     await signUserOut();
   };
   return (
@@ -215,6 +202,7 @@ export const useAuth = () => {
 
 const saveTokenAndUid = async (uid: string, token: string) => {
   try {
+    console.log("firebasetoken: ",{uid, token})
     const res = await fetch("/api/auth", {
       method: "POST",
       headers: {

@@ -1,9 +1,9 @@
-import { BASE_API_URL, request } from "../helpers";
+import { GO_SERVICE_BASE_URL, request } from "../helpers";
 
 export const createShortUrl = async (url: string, uid: string) => {
   try {
     const res = await request<{ short_code: string; long_url: string }>(
-      `${BASE_API_URL}/create`,
+      `${GO_SERVICE_BASE_URL}/create`,
       {
         method: "POST",
         body: { url, uid },
@@ -21,22 +21,25 @@ export const getShortUrls = async (
   limit: number,
   offset: number
 ) => {
-  try{
+  try {
     const res = await request<{
-      id: number;
-      short_code: string;
-      long_url: string;
-      created_at: Date;
-      updated_at: Date;
-      user_id: number;
-    }[]>(`${BASE_API_URL}/user-urls`, {
+      recordCount: number;
+      urls: {
+        id: number;
+        short_code: string;
+        long_url: string;
+        created_at: Date;
+        updated_at: Date;
+        user_id: number;
+      }[];
+    }>(`${GO_SERVICE_BASE_URL}/user-urls`, {
       method: "POST",
       body: { uid, limit, offset },
     });
-  
-    return res
-  } catch(e){
-    console.error(e)
-    throw(e)
+
+    return res;
+  } catch (e) {
+    console.error(e);
+    throw e;
   }
 };

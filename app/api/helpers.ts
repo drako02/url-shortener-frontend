@@ -3,10 +3,13 @@ import { User, UserResponse } from "./types";
 interface RequestOptions {
   method?: "POST" | "PUT" | "GET" | "PATCH" | "DELETE";
   headers?: HeadersInit;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: Record<string, any>;
 }
 
-export const BASE_API_URL = "http://localhost:8080";
+export const GO_SERVICE_BASE_URL = process.env.NEXT_PUBLIC_GO_SERVICE_BASE_URL;
+export const ANALYTICS_SERVICE_BASE_URL = process.env.NEXT_PUBLIC_ANALYTICS_SERVICE_BASE_URL;
+console.log({GO_SERVICE_BASE_URL, ANALYTICS_SERVICE_BASE_URL})
 
 export const request = async <T>(
   url: string,

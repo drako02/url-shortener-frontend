@@ -1,6 +1,6 @@
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { UserResponse } from "../types";
-import { cookies } from "next/headers";
+// import { cookies } from "next/headers";
     // Function to get cookie by name
     export const getCookie = (name: string) => {
         const value = `; ${document.cookie}`;

@@ -1,5 +1,4 @@
 import {
-  Auth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   GoogleAuthProvider,
@@ -12,7 +11,7 @@ const provider = new GoogleAuthProvider();
 
 export const create_with_email_password = async (email: string, password: string) => {
   try {
-    auth
+    // auth
     const userCredentials = await createUserWithEmailAndPassword(
       auth,
       email,

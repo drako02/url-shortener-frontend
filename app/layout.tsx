@@ -5,12 +5,12 @@ import { MainHeader } from "@/mycomponents/headers/header";
 import { ThemeProvider } from "../context/Theme";
 import { AuthProvider } from "../context/Auth";
 import { Toaster } from "@/components/ui/sonner";
-import { SidebarProvider } from "@/components/ui/sidebar";
+// import { SidebarProvider } from "@/components/ui/sidebar";
 import { getUserFromCookies } from "./api/users/get";
 import { mapToUser } from "./api/helpers";
 import { UserProvider } from "@/context/User";
 import { cookies } from "next/headers";
-import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+// import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,13 +39,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   const cookieStore = await cookies();
-  console.log("Cookies on layout: ", cookieStore.getAll())
-  const userCookie = getUserFromCookies(cookieStore)
+  console.log("Cookies on layout: ", cookieStore.getAll());
+  const userCookie = getUserFromCookies(cookieStore);
   const user = userCookie ? mapToUser(userCookie) : undefined;
 
-  console.log("User on layout main in component: ", user)
+  console.log("User on layout main in component: ", user);
 
   return (
     <html lang="en" className="h-full">
@@ -60,8 +59,10 @@ export default async function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <MainHeader />
-              <main className="flex-grow overflow-hidden">{children}</main>
+              <div >
+                <MainHeader />
+              </div>
+              <div className="flex-grow">{children}</div>
               <Toaster />
             </ThemeProvider>
           </AuthProvider>

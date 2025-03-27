@@ -1,7 +1,7 @@
-import { BASE_API_URL, request } from "../helpers";
+import { GO_SERVICE_BASE_URL, request } from "../helpers";
 import { UserResponse } from "../types";
 // import { headers } from "next/headers";
-import { NextRequest } from "next/server";
+// import { NextRequest } from "next/server";
 
 type AddUserRequest = {
   first_name?: string;
@@ -19,7 +19,7 @@ export async function addUser(payload: AddUserRequest) {
     // return
   }
 
-  const res = await request<UserResponse>(`${BASE_API_URL}/users`, {
+  const res = await request<UserResponse>(`${GO_SERVICE_BASE_URL}/users`, {
     method: "POST",
     body: {
       first_name,
@@ -33,7 +33,7 @@ export async function addUser(payload: AddUserRequest) {
 
 export const userExists = async (email: string): Promise<boolean> => {
   const res = await request<{ result: boolean }>(
-    `${BASE_API_URL}/users/exists`,
+    `${GO_SERVICE_BASE_URL}/users/exists`,
     {
       method: "POST",
       body: {
@@ -53,7 +53,7 @@ export const getUser = async (uid: string, idToken: string) => {
     headers.Authorization = `Bearer ${idToken}`;
   }
 
-  const user = await request<UserResponse>(`${BASE_API_URL}/users/${uid}`, {
+  const user = await request<UserResponse>(`${GO_SERVICE_BASE_URL}/users/${uid}`, {
     headers,
   });
   return user;

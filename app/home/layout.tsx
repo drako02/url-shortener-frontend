@@ -1,7 +1,7 @@
 "use client";
 import { useAuth } from "@/context/Auth";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { LoadingScreen } from "@/mycomponents/loaders/loading";
 import {
   AppSidebar,
@@ -39,21 +39,14 @@ export default function HomeLayout({
   useEffect(() => {
 
     console.log("Auth condition user: ", user)
-    // if (!user && !initializing) {
-    //   router.push("/sign-in");
-    // }
+
   }, [initializing, router, user]);
 
   if (initializing) return <LoadingScreen />;
 
   if (!initializing && !user) {
-    // router.push("/sign-in");
     return <LoadingScreen />; // Show loading during redirect
   }
-
-  // if (initializing) return <LoadingScreen />;
-
-  // if (!user) return <LoadingScreen />;
 
   const sideBarOptions: { title: string; options: SideListOptions[] }[] = [
     {
@@ -91,7 +84,7 @@ export default function HomeLayout({
   ];
 
   return (
-    <div className="h-full w-full flex ">
+    <div className=" home-layout h-full w-full flex ">
       {" "}
       <AppSidebar title="URL Shortener" sideOptions={sideBarOptions} />
       {children}
