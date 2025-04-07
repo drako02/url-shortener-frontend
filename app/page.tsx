@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Zap, Clock, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { MainHeader } from "@/mycomponents/headers/header";
 
 export default function Home() {
   const router = useRouter();
@@ -52,33 +53,37 @@ export default function Home() {
     {
       icon: <Lock className="h-6 w-6 text-primary" />,
       title: "Secure & Reliable",
-      description: "Your links are secure and will never expire unless you want them to.",
+      description:
+        "Your links are secure and will never expire unless you want them to.",
     },
   ];
 
+
   return (
     <>
+      <MainHeader />
       <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl">
         {/* Hero Section */}
-        <motion.div 
+        <motion.div
           initial="hidden"
           animate="visible"
           variants={containerVariants}
           className="flex flex-col lg:flex-row items-center justify-between gap-12"
         >
           {/* Left column: Hero text and CTA */}
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="w-full lg:w-1/2 space-y-6"
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-tight">
-              Make your links <span className="text-primary">shorter</span>, 
+              Make your links <span className="text-primary">shorter</span>,
               <br className="hidden md:block" /> smarter, and more powerful.
             </h1>
-            
+
             <p className="text-xl text-muted-foreground max-w-2xl">
-              Instantly shorten long URLs to make them easy to share across any platform. 
-              Start shortening now—it&apos;s fast, free, and effortless!
+              Instantly shorten long URLs to make them easy to share across any
+              platform. Start shortening now—it&apos;s fast, free, and
+              effortless!
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -90,11 +95,15 @@ export default function Home() {
                 className="group relative w-full sm:w-auto"
               >
                 <span className="pr-2">Get Started</span>
-                <ArrowRight className={`h-4 w-4 transition-transform duration-300 ${isHovering ? 'transform translate-x-1' : ''}`} />
+                <ArrowRight
+                  className={`h-4 w-4 transition-transform duration-300 ${
+                    isHovering ? "transform translate-x-1" : ""
+                  }`}
+                />
               </Button>
 
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="lg"
                 onClick={() => router.push("/sign-in")}
                 className="w-full sm:w-auto"
@@ -105,10 +114,7 @@ export default function Home() {
           </motion.div>
 
           {/* Right column: Interactive demo */}
-          <motion.div 
-            variants={itemVariants}
-            className="w-full lg:w-1/2"
-          >
+          <motion.div variants={itemVariants} className="w-full lg:w-1/2">
             <div className="relative rounded-lg overflow-hidden border border-border shadow-2xl">
               <div className="aspect-video bg-card p-4 rounded-lg relative">
                 <div className="bg-muted rounded-md w-full h-10 mb-4"></div>
@@ -134,9 +140,12 @@ export default function Home() {
           className="mt-24 md:mt-32"
         >
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why choose our URL shortener?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Why choose our URL shortener?
+            </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Our platform provides everything you need to manage and track your links effectively.
+              Our platform provides everything you need to manage and track your
+              links effectively.
             </p>
           </div>
 
@@ -166,16 +175,14 @@ export default function Home() {
           transition={{ delay: 1.4, duration: 0.8 }}
           className="mt-24 bg-card border border-border rounded-xl p-8 md:p-12 text-center"
         >
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to shorten your first URL?</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">
+            Ready to shorten your first URL?
+          </h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            Join thousands of users who trust our service for their link shortening needs.
-            No credit card required, get started for free.
+            Join thousands of users who trust our service for their link
+            shortening needs. No credit card required, get started for free.
           </p>
-          <Button 
-            size="lg" 
-            onClick={handleGetStarted}
-            className="px-8"
-          >
+          <Button size="lg" onClick={handleGetStarted} className="px-8">
             Get Started For Free
           </Button>
         </motion.div>
@@ -189,13 +196,22 @@ export default function Home() {
               © {new Date().getFullYear()} URL Shortener. All rights reserved.
             </div>
             <div className="flex gap-6 mt-4 md:mt-0">
-              <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground">
+              <Link
+                href="/terms"
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
                 Terms
               </Link>
-              <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground">
+              <Link
+                href="/privacy"
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
                 Privacy
               </Link>
-              <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground">
+              <Link
+                href="/about"
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
                 About
               </Link>
             </div>

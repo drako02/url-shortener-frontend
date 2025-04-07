@@ -68,8 +68,9 @@ export const SigninForm = () => {
       setIsSubmitting(true);
       const { email, password } = values;
       await signIn({ option: "email_password", email, password });
+      router.push("/home/dashboard");
       toast.success("Signed in successfully!");
-      router.push("/home");
+      // router.push("/home");
     } catch (error) {
       console.error("Failed to sign in", error);
       const errMessage =
@@ -93,7 +94,7 @@ export const SigninForm = () => {
         return;
       }
       toast.success("Signed in successfully!");
-      router.push("/home");
+      router.push("/home/dashboard");
     } catch (error) {
       console.error("Failed to sign in with Google", error);
       const errMessage =

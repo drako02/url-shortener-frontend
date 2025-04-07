@@ -61,10 +61,10 @@ export const MainHeader = () => {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="fixed top-0 z-40 w-full border-b bg-white">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo & Brand */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pl-[3%]">
           <Link href="/" className="flex items-center space-x-2">
             <LinkIcon className="h-6 w-6" />
             <span className="hidden font-bold sm:inline-block">UrlShortener</span>
@@ -107,7 +107,7 @@ export const MainHeader = () => {
                   Features
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[500px]">
                     <ListItem title="URL Shortening" href="#">
                       Create compact, shareable links in seconds
                     </ListItem>

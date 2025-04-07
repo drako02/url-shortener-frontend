@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { MainHeader } from "@/mycomponents/headers/header";
 import { ThemeProvider } from "../context/Theme";
 import { AuthProvider } from "../context/Auth";
 import { Toaster } from "@/components/ui/sonner";
-// import { SidebarProvider } from "@/components/ui/sidebar";
 import { getUserFromCookies } from "./api/users/get";
 import { mapToUser } from "./api/helpers";
 import { UserProvider } from "@/context/User";
 import { cookies } from "next/headers";
-// import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { UrlsProvider } from "@/context/Urls";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,18 +51,20 @@ export default async function RootLayout({
       >
         <UserProvider initialUser={user}>
           <AuthProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <div >
+            <UrlsProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                {/* <div >
                 <MainHeader />
-              </div>
-              <div className="flex-grow">{children}</div>
-              <Toaster />
-            </ThemeProvider>
+              </div> */}
+                <div className="flex-grow">{children}</div>
+                <Toaster />
+              </ThemeProvider>
+            </UrlsProvider>
           </AuthProvider>
         </UserProvider>
       </body>

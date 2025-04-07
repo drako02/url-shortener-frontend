@@ -10,7 +10,7 @@ import {
 } from "@/lib/services/auth";
 import { addUser, getUser } from "@/app/api/users/add";
 import { parseDisplayName } from "@/lib/helpers";
-import { User } from "@/app/api/types";
+import { User, UserResponse } from "@/app/api/types";
 // import { getCookie } from "@/app/api/users/get";
 import { mapToUser } from "@/app/api/helpers";
 import { UserContext } from "./User";

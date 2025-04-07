@@ -72,60 +72,78 @@ const SideBarMain = (props: SideBarMainProps) => {
 
   return (
     <>
-      <Sidebar 
+      <Sidebar
         className={cn(
-          "bg-card border-r border-border transition-all duration-300" ,
-          open ? "w-60" : "w-16"
+          "bg-card border-r border-border transition-all duration-100 mr-0",
+          open ? "w-[200px]" : "w-16"
         )}
         collapsible="icon"
       >
-        <main className="flex flex-col justify-between h-full">
+        <div>
+          <div className={cn(" flex  w-full ",open?"justify-end": "justify-center")}>
+            <SidebarTrigger
+              // triggerIcon={
+              //   open ? <ChevronLeft size={16} /> : <ChevronRight size={16} />
+              // }
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full h-8 w-8"
+              >
+                {/* {open ? <ChevronLeft size={16} /> : <ChevronRight size={16} />} */}
+              </Button>
+            </SidebarTrigger>
+          </div>
+        </div>
+        <main className="flex flex-col justify-between items-center h-full ">
           <div>
             {/* Header area with logo and trigger */}
-            <div className="flex items-center h-16 px-4 border-b border-border">
-              {logo && (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="mr-2 flex items-center"
+
+            <div className="flex  flex-col items-center h-16 px-4 ">
+              <div>
+                {logo && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="mr-2 flex items-center"
+                  >
+                    {logo}
+                  </motion.div>
+                )}
+
+                <motion.div
+                  animate={{ opacity: open ? 1 : 0, width: open ? "auto" : 0 }}
+                  className="font-semibold text-xl overflow-hidden whitespace-nowrap"
                 >
-                  {logo}
+                  {title}
                 </motion.div>
-              )}
-              
-              <motion.div 
-                animate={{ opacity: open ? 1 : 0, width: open ? 'auto' : 0 }}
-                className="font-semibold text-xl overflow-hidden whitespace-nowrap"
-              >
-                {title}
-              </motion.div>
-              
-              <div className="ml-auto">
-                <SidebarTrigger>
-                  <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
-                    {open ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-                  </Button>
-                </SidebarTrigger>
               </div>
             </div>
 
             <SidebarContent className="pt-4 px-2">
               {/* Sidebar content */}
               {sideOptions.map((item, groupIndex) => (
-                <SidebarGroup key={`${item.title}-${groupIndex}`} className="mb-6">
+                <SidebarGroup
+                  key={`${item.title}-${groupIndex}`}
+                  className="mb-6"
+                >
                   {open && (
                     <SidebarGroupLabel className="px-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       {item.title}
                     </SidebarGroupLabel>
                   )}
-                  
+
                   <SidebarGroupContent>
                     <SidebarMenu>
                       {item.options.map((option, optionIndex) => {
                         const isActive = option.url && pathname === option.url;
-                        
+
                         return (
-                          <TooltipProvider key={`${option.name}-${optionIndex}`} delayDuration={300}>
+                          <TooltipProvider
+                            key={`${option.name}-${optionIndex}`}
+                            delayDuration={300}
+                          >
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <SidebarMenuItem>
@@ -134,44 +152,63 @@ const SideBarMain = (props: SideBarMainProps) => {
                                     asChild
                                     className={cn(
                                       "flex items-center px-3 py-2 rounded-md mb-1 group relative",
-                                      isActive 
-                                        ? "bg-primary/10 text-primary" 
+                                      isActive
+                                        ? "bg-primary/10 text-primary"
                                         : "hover:bg-accent text-foreground hover:text-accent-foreground"
                                     )}
                                   >
-                                    <Link 
-                                      href={option.url || "#"} 
+                                    <Link
+                                      href={option.url || "#"}
                                       className="flex items-center w-full"
-                                      onClick={e => option.onOptionClick && e.preventDefault()}
+                                      onClick={(e) => {
+                                        if (!option.onOptionClick) return;
+                                        e.preventDefault();
+                                        option.onOptionClick();
+                                      }}
                                     >
                                       {option.icon && (
-                                        <span className={cn("mr-3", isActive && "text-primary")}>
+                                        <span
+                                          className={cn(
+                                            "mr-3",
+                                            isActive && "text-primary"
+                                          )}
+                                        >
                                           {option.icon}
                                         </span>
                                       )}
-                                      
-                                      <motion.span 
-                                        animate={{ 
+
+                                      <motion.span
+                                        animate={{
                                           opacity: open ? 1 : 0,
-                                          width: open ? 'auto' : 0
+                                          width: open ? "auto" : 0,
                                         }}
                                         className="flex-1 overflow-hidden whitespace-nowrap"
                                       >
                                         {option.name}
                                       </motion.span>
-                                      
+
                                       {option.badge && open && (
-                                        <span className={cn(
-                                          "ml-auto text-xs py-0.5 px-1.5 rounded-full",
-                                          option.badge.variant === "default" && "bg-primary/10 text-primary",
-                                          option.badge.variant === "secondary" && "bg-secondary/10 text-secondary",
-                                          option.badge.variant === "destructive" && "bg-destructive/10 text-destructive",
-                                          option.badge.variant === "success" && "bg-green-500/10 text-green-600",
-                                        )}>
+                                        <span
+                                          className={cn(
+                                            "ml-auto text-xs py-0.5 px-1.5 rounded-full",
+                                            option.badge.variant ===
+                                              "default" &&
+                                              "bg-primary/10 text-primary",
+                                            option.badge.variant ===
+                                              "secondary" &&
+                                              "bg-secondary/10 text-secondary",
+                                            option.badge.variant ===
+                                              "destructive" &&
+                                              "bg-destructive/10 text-destructive",
+                                            option.badge.variant ===
+                                              "success" &&
+                                              "bg-green-500/10 text-green-600"
+                                          )}
+                                        >
                                           {option.badge.text}
                                         </span>
                                       )}
-                                      
+
                                       {isActive && (
                                         <motion.div
                                           layoutId="active-indicator"
@@ -200,12 +237,14 @@ const SideBarMain = (props: SideBarMainProps) => {
               ))}
             </SidebarContent>
           </div>
-          
+
           {footer && (
-            <div className={cn(
-              "border-t border-border p-4 mt-auto",
-              !open && "flex justify-center"
-            )}>
+            <div
+              className={cn(
+                "border-t border-border p-4 mt-auto",
+                !open && "flex justify-center"
+              )}
+            >
               {footer}
             </div>
           )}

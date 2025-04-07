@@ -1,5 +1,5 @@
 "use client";
-import { GO_SERVICE_BASE_URL } from "@/app/api/helpers";
+import { URL_SERVICE_API_BASE_URL } from "@/app/api/helpers";
 import { createShortUrl } from "@/app/api/urls/urls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,6 @@ import {
   Card, 
   CardContent, 
   CardDescription, 
-  CardFooter, 
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
@@ -19,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import QRCode from "react-qr-code";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useUrls } from "@/context/Urls";
 
 export const CreateUrlPage = () => {
   const [url, setUrl] = useState<string>("");
@@ -34,13 +34,14 @@ export const CreateUrlPage = () => {
   const { user } = useAuth();
 
   // Load recent URLs from localStorage on initial render
+  const {updateUrls} = useUrls()
   useEffect(() => {
     const savedUrls = localStorage.getItem('recentUrls');
     if (savedUrls) {
       try {
         setRecentUrls(JSON.parse(savedUrls));
-      } catch (e) {
-        console.error("Failed to parse saved URLs");
+      } catch(e) {
+        console.error(e instanceof Error ? e.message : "Failed to parse saved URLs");
       }
     }
   }, []);
@@ -53,7 +54,7 @@ export const CreateUrlPage = () => {
           validateUrl(url);
           setIsUrlValid(true);
           setError(null);
-        } catch (e) {
+        } catch {
           setIsUrlValid(false);
           setError("Please enter a valid URL");
         }
@@ -94,7 +95,7 @@ export const CreateUrlPage = () => {
         inputUrl = `https://${inputUrl}`;
       }
       return new URL(inputUrl).toString();
-    } catch (e) {
+    } catch {
       throw new Error("Invalid URL format");
     }
   };
@@ -112,9 +113,10 @@ export const CreateUrlPage = () => {
         validUrl,
         user?.uid as string
       );
+      updateUrls(0, 1)
       
       setShortCode(short_code);
-      const shortUrl = `${GO_SERVICE_BASE_URL}/${short_code}`;
+      const shortUrl = `${URL_SERVICE_API_BASE_URL}/${short_code}`;
       
       // Add to recent URLs
       const newRecentUrl = { original: validUrl, short: shortUrl, shortCode: short_code };
@@ -125,10 +127,10 @@ export const CreateUrlPage = () => {
       toast.success("URL shortened successfully!");
       setUrl("");
       setIsUrlValid(null);
-    } catch (e: any) {
+    } catch (e) {
       console.error("Failed to create short url", e);
-      setError(e.message || "Failed to create short URL");
-      toast.error(e.message || "Failed to create short URL");
+      setError(e instanceof Error ? e.message : "Failed to create short URL");
+      toast.error(e instanceof Error ? e.message : "Failed to create short URL");
     } finally {
       setIsLoading(false);
     }
@@ -240,17 +242,17 @@ export const CreateUrlPage = () => {
                       <CardContent className="pt-4">
                         <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
                           <a
-                            href={`${GO_SERVICE_BASE_URL}/${shortCode}`}
+                            href={`${URL_SERVICE_API_BASE_URL}/${shortCode}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="font-medium text-primary hover:underline truncate mr-2"
                           >
-                            {`${GO_SERVICE_BASE_URL}/${shortCode}`}
+                            {`${URL_SERVICE_API_BASE_URL}/${shortCode}`}
                           </a>
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            onClick={() => copyToClipboard(`${GO_SERVICE_BASE_URL}/${shortCode}`)} 
+                            onClick={() => copyToClipboard(`${URL_SERVICE_API_BASE_URL}/${shortCode}`)} 
                             aria-label="Copy to clipboard"
                           >
                             {copied ? (
@@ -268,7 +270,7 @@ export const CreateUrlPage = () => {
                     <Card>
                       <CardContent className="pt-4 flex justify-center">
                         <div className="p-4 bg-white rounded-lg">
-                          <QRCode value={`${GO_SERVICE_BASE_URL}/${shortCode}`} size={180} />
+                          <QRCode value={`${URL_SERVICE_API_BASE_URL}/${shortCode}`} size={180} />
                         </div>
                       </CardContent>
                     </Card>
@@ -304,7 +306,7 @@ export const CreateUrlPage = () => {
                           rel="noopener noreferrer"
                           className="text-base font-medium text-primary hover:underline"
                         >
-                          {`${GO_SERVICE_BASE_URL}/${item.shortCode}`}
+                          {`${URL_SERVICE_API_BASE_URL}/${item.shortCode}`}
                         </a>
                       </div>
                       <Button
