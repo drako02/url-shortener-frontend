@@ -30,7 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import { LinkIcon, Menu, User, LogOut, ChevronDown, Home, Info, Zap } from "lucide-react";
 
-const protectedRoutes = ["/home", "/home/user-urls"];
+const protectedRoutes = ["/home", "/user-urls"];
 const excludeRoutes = ["/sign-in", "/sign-up"];
 
 export const MainHeader = () => {
@@ -89,10 +89,10 @@ export const MainHeader = () => {
               
               {isProtectedRoute && (
                 <NavigationMenuItem>
-                  <Link href="/home/user-urls" legacyBehavior passHref>
+                  <Link href="/user-urls" legacyBehavior passHref>
                     <NavigationMenuLink className={cn(
                       navigationMenuTriggerStyle(),
-                      isActive("/home/user-urls") && "font-medium text-primary"
+                      isActive("/user-urls") && "font-medium text-primary"
                     )}>
                       <LinkIcon className="mr-2 h-4 w-4" />
                       My URLs
@@ -151,7 +151,7 @@ export const MainHeader = () => {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push('/home/user-urls')}>
+                  <DropdownMenuItem onClick={() => router.push('/user-urls')}>
                     My URLs
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push('/profile')}>
@@ -210,10 +210,10 @@ export const MainHeader = () => {
                 
                 {isProtectedRoute && (
                   <Link 
-                    href="/home/user-urls"
+                    href="/user-urls"
                     className={cn(
                       "flex items-center gap-2 px-2 py-1 text-lg font-medium rounded-md hover:bg-accent",
-                      isActive("/home/user-urls") && "bg-accent"
+                      isActive("/user-urls") && "bg-accent"
                     )}
                   >
                     <LinkIcon className="h-5 w-5" />

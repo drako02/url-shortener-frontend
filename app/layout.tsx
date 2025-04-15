@@ -4,10 +4,10 @@ import "./globals.css";
 import { ThemeProvider } from "../context/Theme";
 import { AuthProvider } from "../context/Auth";
 import { Toaster } from "@/components/ui/sonner";
-import { getUserFromCookies } from "./api/users/get";
-import { mapToUser } from "./api/helpers";
-import { UserProvider } from "@/context/User";
-import { cookies } from "next/headers";
+// import { getUserFromCookies } from "./api/users/get";
+// import { mapToUser } from "./api/helpers";
+// import { UserProvider } from "@/context/User";
+// import { cookies } from "next/headers";
 import { UrlsProvider } from "@/context/Urls";
 
 const geistSans = Geist({
@@ -37,36 +37,36 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  console.log("Cookies on layout: ", cookieStore.getAll());
-  const userCookie = getUserFromCookies(cookieStore);
-  const user = userCookie ? mapToUser(userCookie) : undefined;
+  // const cookieStore = await cookies();
+  // console.log("Cookies on layout: ", cookieStore.getAll());
+  // const userCookie = getUserFromCookies(cookieStore);
+  // const user = userCookie ? mapToUser(userCookie) : undefined;
 
-  console.log("User on layout main in component: ", user);
+  // console.log("User on layout main in component: ", user);
 
   return (
     <html lang="en" className="h-full">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col h-full`}
       >
-        <UserProvider initialUser={user}>
-          <AuthProvider>
-            <UrlsProvider>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-              >
-                {/* <div >
+        {/* <UserProvider initialUser={user}> */}
+        <AuthProvider>
+          <UrlsProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {/* <div >
                 <MainHeader />
               </div> */}
-                <div className="flex-grow">{children}</div>
-                <Toaster />
-              </ThemeProvider>
-            </UrlsProvider>
-          </AuthProvider>
-        </UserProvider>
+              <div className="flex-grow">{children}</div>
+              <Toaster />
+            </ThemeProvider>
+          </UrlsProvider>
+        </AuthProvider>
+        {/* </UserProvider> */}
       </body>
     </html>
   );

@@ -10,9 +10,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
   try {
     const body = await req.json();
-    const { idToken, uid } = body;
+    // const { idToken, uid } = body;
+    const { idToken } = body;
 
-    if (!idToken || !uid) {
+
+    if (!idToken) {
       return NextResponse.json(
         { error: "IdToken is required" },
         { status: 400 }
@@ -23,19 +25,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const cookieStore = await cookies();
     cookieStore.set("session", idToken, {
       httpOnly: true,
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 60 * 24,
       path: "/",
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
 
-    cookieStore.set("uid", uid, {
-      httpOnly: true,
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    });
+    // cookieStore.set("uid", uid, {
+    //   httpOnly: true,
+    //   maxAge: 60 * 60 * 24 * 7,
+    //   path: "/",
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: "strict",
+    // });
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -51,7 +53,7 @@ export async function DELETE() {
   try {
     const cookieStore = await cookies();
     cookieStore.delete("session");
-    cookieStore.delete("userData");
+    // cookieStore.delete("userData");
 
     cookieStore.delete("uid");
 

@@ -34,7 +34,7 @@ export const CreateUrlPage = () => {
   const { user } = useAuth();
 
   // Load recent URLs from localStorage on initial render
-  const {updateUrls} = useUrls()
+  const {updateUrls, allUrlsTotal} = useUrls()
   useEffect(() => {
     const savedUrls = localStorage.getItem('recentUrls');
     if (savedUrls) {
@@ -113,7 +113,8 @@ export const CreateUrlPage = () => {
         validUrl,
         user?.uid as string
       );
-      updateUrls(0, 1)
+      console.log("totals, totals + 1: ", allUrlsTotal, allUrlsTotal+1)
+      await updateUrls(allUrlsTotal+1, allUrlsTotal+2)
       
       setShortCode(short_code);
       const shortUrl = `${URL_SERVICE_API_BASE_URL}/${short_code}`;

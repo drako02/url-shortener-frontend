@@ -68,7 +68,7 @@ export const SigninForm = () => {
       setIsSubmitting(true);
       const { email, password } = values;
       await signIn({ option: "email_password", email, password });
-      router.push("/home/dashboard");
+      router.push("/dashboard");
       toast.success("Signed in successfully!");
       // router.push("/home");
     } catch (error) {
@@ -94,7 +94,7 @@ export const SigninForm = () => {
         return;
       }
       toast.success("Signed in successfully!");
-      router.push("/home/dashboard");
+      router.push("/dashboard");
     } catch (error) {
       console.error("Failed to sign in with Google", error);
       const errMessage =

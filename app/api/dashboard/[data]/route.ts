@@ -12,7 +12,7 @@ export async function GET(
   { params }: { params: { data: "urls" | "clicks" } }
 ) {
   try {
-    const data = params.data;
+    const data = (await params).data;
     const uid = request.nextUrl.searchParams.get("uid");
 
     switch (data) {

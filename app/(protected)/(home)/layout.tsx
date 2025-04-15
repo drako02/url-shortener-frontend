@@ -61,17 +61,17 @@ export default function HomeLayout({
         {
           name: "Dashboard",
           icon: <Home size={18} />,
-          url: "/home/dashboard",
+          url: "/dashboard",
         },
         {
           name: "My URLs",
           icon: <Link size={18} />,
-          url: "/home/user-urls",
+          url: "/user-urls",
         },
         {
           name: "Create URL",
           icon: <PlusCircle size={18} />,
-          url: "/home/create",
+          url: "/create",
         },
       ],
     },

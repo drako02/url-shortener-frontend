@@ -61,8 +61,8 @@ export const UrlsProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("Provider urls: ", fetchedUrls);
 
         setAllUrlsTotal(recordCount);
-        setUrls((prevMap) => {
-          const newMap = new Map(prevMap);
+        setUrls(() => {
+          const newMap = new Map();
           fetchedUrls.forEach((url, index) => newMap.set(index, url));
           return newMap;
         });
@@ -82,28 +82,40 @@ export const UrlsProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     fetchInitialUrls();
+    console.log("user in url provider: ", user);
   }, [user]);
 
   const updateUrls = useCallback(
     async (limit: number, offset: number) => {
+      console.log("update urls called");
+
       try {
         setInitializing(true);
         if (!user) return;
         console.log({ allUrlsTotal, urlsMapSize: urls.size });
+
+        const pageSize = Math.min(limit, allUrlsTotal - offset);
         const hasDataForRequestedRange =
           urls.size === allUrlsTotal ||
-          Array.from({ length: limit }).every((_, i) => urls.has(offset + i));
-
+          Array.from({ length: pageSize }).every((_, i) =>
+            urls.has(offset + i)
+          );
+      
+        console.log("update urls called got here");
         if (hasDataForRequestedRange) return;
 
+        console.log("update urls called got herrrre??");
         const { recordCount, urls: newUrls } = await getShortUrls(
           user.uid,
           limit,
           offset
         );
 
+
         // Update the total count if needed
         if (recordCount !== allUrlsTotal) {
+          console.log("update urls called recordCount check");
+
           setAllUrlsTotal(recordCount);
         }
 

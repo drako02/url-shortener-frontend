@@ -10,10 +10,10 @@ import {
 } from "@/lib/services/auth";
 import { addUser, getUser } from "@/app/api/users/add";
 import { parseDisplayName } from "@/lib/helpers";
-import { User, UserResponse } from "@/app/api/types";
+import { User } from "@/app/api/types";
 // import { getCookie } from "@/app/api/users/get";
 import { mapToUser } from "@/app/api/helpers";
-import { UserContext } from "./User";
+// import { UserContext } from "./User";
 
 type SignIn =
   | {
@@ -45,26 +45,27 @@ export const AuthContext = React.createContext<AuthContextProps>({
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { user: userFromProvider } = useContext(UserContext);
+  // const { user: userFromProvider } = useContext(UserContext);
 
   // console.log("AuthProvider user first time: ", userFromProvider)
 
-  const [user, setUser] = useState<User | undefined>(userFromProvider);
+  const [user, setUser] = useState<User | undefined>(undefined);
   const [initializing, setInitializing] = useState<boolean>(false);
-  const [checkedCookies, setCheckedCookies] = useState(false);
+  // const [checkedCookies, setCheckedCookies] = useState(false);
 
   const isAuthenticated = Boolean(user) && !initializing;
 
-  console.log(JSON.stringify(user));
+  // console.log(JSON.stringify(user));
+
   useEffect(() => {
     if (user) {
-      console.log("Returned because user already exists");
+      // console.log("Returned because user already exists", user);
       return;
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setInitializing(true);
-      console.log("Auth state firebase user: ", firebaseUser);
+      // console.log("Auth state firebase user: ", firebaseUser);
       if (!firebaseUser) {
         setUser(undefined);
         setInitializing(false);
@@ -74,7 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const idToken = await firebaseUser.getIdToken();
       getUser(firebaseUser?.uid, idToken)
         .then((res) => {
-          console.log("GET USER RESPONSE", JSON.stringify(res));
+          // console.log("GET USER RESPONSE", JSON.stringify(res));
           setUser(mapToUser(res));
         })
         .catch((e) => {
@@ -86,7 +87,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, [checkedCookies, user]);
+  }, [user]);
+
+  useEffect(() => {
+    const unsubscribe = auth.onIdTokenChanged(async (user) => {
+      if(user) {
+        const newToken = await user.getIdToken();
+        await saveTokenAndUid(newToken);
+      }
+    })
+
+    return () => unsubscribe()
+  }, [])
 
   const signIn = async (props: SignIn): Promise<string> => {
     setInitializing(true);
@@ -97,8 +109,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const firebaseUser = await sign_in_email_password(email, password);
 
         const idToken = await firebaseUser.getIdToken(true);
-        console.log("TTTTOOOOKKKKEEENNN: ", idToken)
-        await saveTokenAndUid(firebaseUser.uid, idToken);
+        // console.log("TTTTOOOOKKKKEEENNN: ", idToken)
+        await saveTokenAndUid(idToken);
         const user = await getUser(firebaseUser.uid, idToken);
         setUser(mapToUser(user));
         return firebaseUser.uid;
@@ -118,14 +130,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const idToken = await firebaseUser.getIdToken();
           if (newUser) {
             setUser(mapToUser(newUser));
-            await saveTokenAndUid(firebaseUser.uid, idToken);
+            await saveTokenAndUid(idToken);
             return firebaseUser.uid;
           }
         } catch (error) {
+          console.error(error)
           const idToken = await firebaseUser.getIdToken();
 
           const existingUser = await getUser(firebaseUser.uid, idToken);
-          await saveTokenAndUid(firebaseUser.uid, idToken);
+          await saveTokenAndUid(idToken);
 
           setUser(mapToUser(existingUser));
           return firebaseUser.uid;
@@ -156,7 +169,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       setUser(mapToUser(user));
       const idToken = await firebaseUser.getIdToken();
-      await saveTokenAndUid(firebaseUser.uid, idToken);
+      await saveTokenAndUid(idToken);
       return firebaseUser.uid;
     } catch (error) {
       console.error("Account creation error:", error);
@@ -200,15 +213,15 @@ export const useAuth = () => {
   return context;
 };
 
-const saveTokenAndUid = async (uid: string, token: string) => {
+const saveTokenAndUid = async (token: string) => {
   try {
-    console.log("firebasetoken: ",{uid, token})
+    // console.log("firebasetoken: ",{token})
     const res = await fetch("/api/auth", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ idToken: token, uid }),
+      body: JSON.stringify({ idToken: token }),
     });
 
     if (!res.ok) {
@@ -218,7 +231,7 @@ const saveTokenAndUid = async (uid: string, token: string) => {
       );
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw new Error("Failed to save data on server", { cause: error });
   }
 };
