@@ -16,23 +16,26 @@ import {
 } from "@/components/ui/tooltip";
 import { CustomPagination } from "../pagination";
 import { TableLoader } from "../loaders/table";
+import { cn } from "@/lib/utils";
 
 export const TableComponent = (props: TableProps) => {
-  const { headers, rows, pagination, isLoading } = props;
+  const { headers, rows, pagination, isLoading, className } = props;
 
   if (isLoading) {
     return (
-      <TableLoader 
+      <TableLoader
         rowCount={10}
-        columnCount={headers.length} 
+        columnCount={headers.length}
         showHeader={true}
         className="w-full m-[2%]"
       />
     );
   }
-  
+
   return (
-    <div className="w-full m-[2%] border-[1px] rounded-lg">
+    <div
+      className={cn("w-full m-[2%] border-[1px] rounded-lg", className || "")}
+    >
       <Table>
         <TableHeader>
           <TableRow>
@@ -78,13 +81,11 @@ export const TableComponent = (props: TableProps) => {
           ))}
         </TableBody>
       </Table>
-      {
-        pagination &&
-      
-      <div className="h-[48px] w-full flex justify-center border-t-[1px]">
-        <CustomPagination {...pagination}/>
-      </div>
-}
+      {pagination && (
+        <div className="h-[48px] w-full flex justify-center border-t-[1px]">
+          <CustomPagination {...pagination} />
+        </div>
+      )}
     </div>
   );
 };

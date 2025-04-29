@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 export async function middleware(req: NextRequest) {
-  console.log("Middleware executed for path:", req.nextUrl.pathname);
-  console.log("Cookies:", JSON.stringify(req.cookies.getAll()));
-    const cookieStore = await  cookies()
+  // console.log("Middleware executed for path:", req.nextUrl.pathname);
+  // console.log("Cookies:", JSON.stringify(req.cookies.getAll()));
+    // const cookieStore = await  cookies()
 
-  console.log("COokie store during middleware execution",cookieStore.getAll())
+  // console.log("COokie store during middleware execution",cookieStore.getAll())
 
 
   const url = req.nextUrl.clone();
@@ -16,7 +16,7 @@ export async function middleware(req: NextRequest) {
   }
 
   const session = req.cookies.get("session")?.value || "";
-  console.log("SESSION: ", session)
+  // console.log("SESSION: ", session)
 
   if (!session) {
     url.pathname = "/sign-in";

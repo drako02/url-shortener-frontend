@@ -11,7 +11,7 @@ export default async function ProtectedLayout({
 }) {
   // Get session cookie
   const session = (await cookies()).get("session")?.value;
-  console.log("protected layout session: ", session)
+  // console.log("protected layout session: ", session)
   
   if (!session) {
     redirect("/sign-in");

@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode } from "react";
+import { ReactNode } from "react";
 import { CustomPaginationProps } from "../pagination";
 
 interface HeaderCellProps{
@@ -23,5 +23,6 @@ export interface TableProps {
     rows: RowContentProps[];
     pagination?: CustomPaginationProps;
     isLoading?: boolean;
+    className?: string
 }
 

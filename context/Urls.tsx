@@ -8,25 +8,12 @@ import {
   useState,
 } from "react";
 import { useAuth } from "./Auth";
-import { logError } from "@/app/api/helpers";
+import { fetchRequest, logError, parseSearchParams } from "@/app/api/helpers";
+import { UrlContextProps, UrlData } from "@/app/types";
+import { usePathname } from "next/navigation";
+import { URLResponse } from "@/app/api/types";
+import { toast } from "sonner";
 
-type UrlData = {
-  id: number;
-  short_code: string;
-  long_url: string;
-  created_at: string;
-  updated_at: string;
-  user_id: number;
-  visits?: number;
-};
-
-type UrlContextProps = {
-  // urls: UrlData[];
-  urls: Map<number, UrlData>;
-  allUrlsTotal: number;
-  initializing: boolean;
-  updateUrls: (limit: number, offset: number) => Promise<void>;
-};
 const UrlsContext = createContext<UrlContextProps>({
   urls: new Map(),
   allUrlsTotal: 0,
@@ -42,6 +29,9 @@ export const UrlsProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [initializing, setInitializing] = useState<boolean>(true);
   const [allUrlsTotal, setAllUrlsTotal] = useState<number>(0);
+  const [filterMode, setFilterMode] = useState<boolean>(false);
+
+  const pathName = usePathname()
 
   const { user } = useAuth();
   const INITIAL_URLS_LIMIT = 10;
@@ -86,8 +76,20 @@ export const UrlsProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user]);
 
   const updateUrls = useCallback(
-    async (limit: number, offset: number) => {
+    async (limit: number, offset: number, queryString?: string) => {
       console.log("update urls called");
+      console.log("OFFSET: ", offset);
+      if(queryString){
+        console.log("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKK")
+        setFilterMode(true)
+        urls.clear()
+        // setAllUrlsTotal(0)
+      }
+      if(!queryString && filterMode){
+        setFilterMode(false)
+        urls.clear()
+        // setAllUrlsTotal(0)
+      }
 
       try {
         setInitializing(true);
@@ -102,14 +104,30 @@ export const UrlsProvider = ({ children }: { children: React.ReactNode }) => {
           );
       
         console.log("update urls called got here");
-        if (hasDataForRequestedRange) return;
+        if (!filterMode && hasDataForRequestedRange) return;
 
         console.log("update urls called got herrrre??");
-        const { recordCount, urls: newUrls } = await getShortUrls(
-          user.uid,
-          limit,
-          offset
-        );
+
+        let recordCount:number;
+        let newUrls:URLResponse[];
+
+        if(!queryString ){
+          const { recordCount: _recordCount, urls } = await getShortUrls(
+            user.uid,
+            limit,
+            offset
+          );
+          recordCount = _recordCount;
+          newUrls = urls;
+        } else {
+          console.log("filter update func called")
+          const res = await fetchFilterUrlsUrls(queryString) ?? { length: 0, urls: [] };
+          recordCount = res.length;
+          newUrls = res.urls
+          console.log({"filter content": [res.length, res.urls, queryString]})
+
+
+        }
 
 
         // Update the total count if needed
@@ -138,8 +156,22 @@ export const UrlsProvider = ({ children }: { children: React.ReactNode }) => {
         setInitializing(false);
       }
     },
-    [allUrlsTotal, urls, user]
+    [allUrlsTotal, filterMode, urls, user]
   );
+
+  const fetchFilterUrlsUrls = async (queryString: string) => {
+    try {
+      const res = await fetchRequest<{ urls: URLResponse[]; length: number }>(
+        "/api/urls",
+        { method: "POST", body: parseSearchParams(queryString) }
+      );
+      console.log("endres",res)
+      return res
+    } catch (error) {
+        console.error("Error fetching URLs:", error);
+        toast.error("Failed to load URLs. Please try again.");
+    }
+  };
 
   return (
     <UrlsContext.Provider

@@ -1,10 +1,10 @@
 export type User = {
-    firstName?: string;
-    lastName?: string;
-    email: string;
-    uid: string;
-    joinedAt: Date;
-}
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  uid: string;
+  joinedAt: Date;
+};
 
 export type UserResponse = {
   first_name?: string;
@@ -19,7 +19,7 @@ export type ClicksResponse = {
   shortCode: string;
   timestamp: string;
   userId: string;
-}
+};
 
 export interface URLResponse {
   id: number;
@@ -37,4 +37,37 @@ export interface ShortUrl {
   createdAt: Date;
   updatedAt: Date;
   userId: number;
+}
+
+export type FilterOperator =
+  | "eq" // equals
+  | "ne" // not equals
+  | "gt" // greater than
+  | "lt" // less than
+  | "contains" // contains substring
+  | "starts_with"
+  | "ends_with"
+  | "between"
+  | "fulltext";
+
+export type FilterCondition = {
+  field: string;
+  operator: FilterOperator;
+  value: unknown; // Single value for most operators
+  values?: unknown[]; // Multiple values for 'between' operator
+} | FulltextCondtion
+
+export type FulltextCondtion = {
+  fields: string[] // for fulltext queries
+  operator: "fulltext";
+  value: unknown
+}
+
+export interface UrlQuery {
+  limit?: number;
+  offset?: number;
+  filters?: FilterCondition[];
+  sortBy?: string;
+  sortOrder?: "desc" | "asc";
+  uid: string;
 }
