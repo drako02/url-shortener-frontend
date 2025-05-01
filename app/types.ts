@@ -1,3 +1,7 @@
+// import { FilterProps } from "@/hooks/search";
+
+import { FilterCondition } from "./api/types";
+
 export type UrlData = {
   id: number;
   short_code: string;
@@ -11,11 +15,25 @@ export type UrlData = {
 export type UrlContextProps = {
   // urls: UrlData[];
   urls: Map<number, UrlData>;
-  allUrlsTotal: number;
+  totalUrlCount: number;
   initializing: boolean;
   updateUrls: (
     limit: number,
     offset: number,
     queryString?: string
   ) => Promise<void>;
+  filter: (props: FilterProps) => {queryString: string};
+  currentQueryString: string;
+  // filterItems: {queryString: string, params: FilterProps}
+  isNavigating: boolean;
+  setNavigatingState: (state: boolean) => void;
+
 };
+
+export interface FilterProps {
+  filters: FilterCondition[];
+  limit?: number;
+  offset?: number;
+  sortBy?: string;
+  sortOrder?: "desc" | "asc";
+}

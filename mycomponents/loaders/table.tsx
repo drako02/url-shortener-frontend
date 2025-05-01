@@ -57,15 +57,9 @@ export function TableLoader({
   className,
   showHeader = true,
 }: TableLoaderProps) {
-  // Generate random widths for more natural-looking skeletons
-  const getRandomWidth = () => {
-    const widths = [60, 80, 120, 140, 160, 200];
-    return widths[Math.floor(Math.random() * widths.length)];
-  };
-  
   return (
     <div 
-      className={cn("w-full border-[1px] rounded-lg overflow-hidden animate-pulse", className)}
+      className={cn("w-full m-[2%] border-[1px] rounded-lg", className || "")}
       style={{ height }}
     >
       <Table>
@@ -74,7 +68,7 @@ export function TableLoader({
             <TableRow>
               {Array.from({ length: columnCount }).map((_, index) => (
                 <TableHead key={`header-${index}`}>
-                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-6 w-24" /> {/* Fixed width of 6rem */}
                 </TableHead>
               ))}
             </TableRow>
@@ -87,11 +81,11 @@ export function TableLoader({
               {Array.from({ length: columnCount }).map((_, colIndex) => (
                 <TableCell key={`cell-${rowIndex}-${colIndex}`}>
                   <div className="flex flex-col gap-1">
-                    <Skeleton className={`h-4 w-${getRandomWidth()}`} />
-                    {/* Occasionally show a sublabel skeleton */}
-                    {Math.random() > 0.7 && (
+                    <Skeleton className="h-4 w-24" /> {/* Fixed width of 6rem */}
+                    {/* Use consistent pattern for sublabels based on column type */}
+                    {/* {[2, 3].includes(colIndex) && (
                       <Skeleton className="h-3 w-16 mt-1" />
-                    )}
+                    )} */}
                   </div>
                 </TableCell>
               ))}

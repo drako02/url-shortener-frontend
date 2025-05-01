@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { UrlQuery, URLResponse } from "../types";
+import { UrlQuery } from "../types";
 import { fetchRequest, logError, URL_SERVICE_API_BASE_URL } from "../helpers";
 import { ApiError } from "next/dist/server/api-utils";
-import { auth } from "@/firebaseConfig";
 
 export async function POST(request: NextRequest) {
   try {

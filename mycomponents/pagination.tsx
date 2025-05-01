@@ -61,9 +61,12 @@ export const CustomPagination = ({
               currentPage === 1 ? "pointer-events-none opacity-50" : "",
               "transition-opacity"
             )}
-            onClick={
-              currentPage === 1 ? undefined : () => handleOffset("previous")
-            }
+            onClick={(e) => {
+              e.preventDefault();
+              if (currentPage > 1) {
+                handleOffset("previous");
+              }
+            }}
             href="#"
           />
         </PaginationItem>
@@ -91,22 +94,23 @@ export const CustomPagination = ({
           </>
         )}
 
-        {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(
-          (page) => (
-            <PaginationItem key={page}>
-              <PaginationLink
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setPage(page);
-                }}
-                isActive={currentPage === page}
-              >
-                {page}
-              </PaginationLink>
-            </PaginationItem>
-          )
-        )}
+        {Array.from(
+          { length: endPage - startPage + 1 },
+          (_, i) => startPage + i
+        ).map((page) => (
+          <PaginationItem key={page}>
+            <PaginationLink
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setPage(page);
+              }}
+              isActive={currentPage === page}
+            >
+              {page}
+            </PaginationLink>
+          </PaginationItem>
+        ))}
 
         {endPage < totalPages && (
           <>
@@ -137,9 +141,12 @@ export const CustomPagination = ({
               currentPage >= totalPages ? "pointer-events-none opacity-50" : "",
               "transition-opacity"
             )}
-            onClick={
-              currentPage >= totalPages ? undefined : () => handleOffset("next")
-            }
+            onClick={(e) => {
+              e.preventDefault();
+              if (currentPage < totalPages) {
+                handleOffset("next");
+              }
+            }}
             href="#"
           />
         </PaginationItem>

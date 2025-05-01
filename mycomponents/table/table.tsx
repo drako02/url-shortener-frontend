@@ -24,11 +24,21 @@ export const TableComponent = (props: TableProps) => {
   if (isLoading) {
     return (
       <TableLoader
-        rowCount={10}
+        rowCount={8}
         columnCount={headers.length}
-        showHeader={true}
-        className="w-full m-[2%]"
+        showHeader={false}
+        className="w-full m-1"
+        height={"80%"}
       />
+    );
+  }
+
+  if (rows.length === 0 && !isLoading) {
+    return (
+      <div className="w-full py-12 flex flex-col items-center justify-center border-[1px] rounded-lg">
+        <p className="text-lg text-gray-500">No data available</p>
+        <p className="text-sm text-gray-400">There are no entries to display</p>
+      </div>
     );
   }
 

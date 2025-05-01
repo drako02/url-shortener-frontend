@@ -7,12 +7,12 @@ import { useAuth } from "@/context/Auth";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Copy, CheckCircle2, Link2, Loader2, AlertCircle } from "lucide-react";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,21 +27,25 @@ export const CreateUrlPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isUrlValid, setIsUrlValid] = useState<boolean | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
-  const [recentUrls, setRecentUrls] = useState<Array<{original: string, short: string, shortCode: string}>>([]);
+  const [recentUrls, setRecentUrls] = useState<
+    Array<{ original: string; short: string; shortCode: string }>
+  >([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const shortUrlRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAuth();
 
   // Load recent URLs from localStorage on initial render
-  const {updateUrls, allUrlsTotal} = useUrls()
+  const { updateUrls, totalUrlCount: allUrlsTotal } = useUrls();
   useEffect(() => {
-    const savedUrls = localStorage.getItem('recentUrls');
+    const savedUrls = localStorage.getItem("recentUrls");
     if (savedUrls) {
       try {
         setRecentUrls(JSON.parse(savedUrls));
-      } catch(e) {
-        console.error(e instanceof Error ? e.message : "Failed to parse saved URLs");
+      } catch (e) {
+        console.error(
+          e instanceof Error ? e.message : "Failed to parse saved URLs"
+        );
       }
     }
   }, []);
@@ -85,7 +89,7 @@ export const CreateUrlPage = () => {
   // Scroll to result when shortCode is available
   useEffect(() => {
     if (shortCode && shortUrlRef.current) {
-      shortUrlRef.current.scrollIntoView({ behavior: 'smooth' });
+      shortUrlRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [shortCode]);
 
@@ -102,36 +106,43 @@ export const CreateUrlPage = () => {
 
   const handleCreate = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    
+
     setError(null);
     setShortCode(null);
     setIsLoading(true);
-    
+
     try {
       const validUrl = validateUrl(url);
       const { short_code } = await createShortUrl(
         validUrl,
         user?.uid as string
       );
-      console.log("totals, totals + 1: ", allUrlsTotal, allUrlsTotal+1)
-      await updateUrls(allUrlsTotal+1, allUrlsTotal+2)
-      
+      console.log("totals, totals + 1: ", allUrlsTotal, allUrlsTotal + 1);
+      updateUrls(1, allUrlsTotal + 10);
+      console.log("ALLTOTALURLS + 1", allUrlsTotal + 1);
+
       setShortCode(short_code);
       const shortUrl = `${URL_SERVICE_API_BASE_URL}/${short_code}`;
-      
+
       // Add to recent URLs
-      const newRecentUrl = { original: validUrl, short: shortUrl, shortCode: short_code };
+      const newRecentUrl = {
+        original: validUrl,
+        short: shortUrl,
+        shortCode: short_code,
+      };
       const updatedRecentUrls = [newRecentUrl, ...recentUrls.slice(0, 4)];
       setRecentUrls(updatedRecentUrls);
-      localStorage.setItem('recentUrls', JSON.stringify(updatedRecentUrls));
-      
+      localStorage.setItem("recentUrls", JSON.stringify(updatedRecentUrls));
+
       toast.success("URL shortened successfully!");
       setUrl("");
       setIsUrlValid(null);
     } catch (e) {
       console.error("Failed to create short url", e);
       setError(e instanceof Error ? e.message : "Failed to create short URL");
-      toast.error(e instanceof Error ? e.message : "Failed to create short URL");
+      toast.error(
+        e instanceof Error ? e.message : "Failed to create short URL"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -145,22 +156,25 @@ export const CreateUrlPage = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && url.trim() && isUrlValid) {
+    if (e.key === "Enter" && url.trim() && isUrlValid) {
       handleCreate();
     }
   };
 
   return (
     <div className="container max-w-3xl mx-auto px-4 py-12">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="text-center mb-12"
       >
-        <h1 className="text-4xl font-bold tracking-tight mb-3">URL Shortener</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-3">
+          URL Shortener
+        </h1>
         <p className="text-muted-foreground text-lg max-w-lg mx-auto">
-          Simplify your links and track clicks with our powerful URL shortening tool
+          Simplify your links and track clicks with our powerful URL shortening
+          tool
         </p>
       </motion.div>
 
@@ -180,8 +194,10 @@ export const CreateUrlPage = () => {
                     ref={inputRef}
                     className={cn(
                       "pr-10 h-12 text-base transition-all duration-200",
-                      isUrlValid === true && "border-green-500 focus-visible:ring-green-500",
-                      isUrlValid === false && "border-red-500 focus-visible:ring-red-500"
+                      isUrlValid === true &&
+                        "border-green-500 focus-visible:ring-green-500",
+                      isUrlValid === false &&
+                        "border-red-500 focus-visible:ring-red-500"
                     )}
                     placeholder="https://example.com/very/long/url/that/needs/shortening"
                     onChange={(e) => setUrl(e.target.value)}
@@ -191,11 +207,15 @@ export const CreateUrlPage = () => {
                     aria-label="URL to shorten"
                   />
                   <div className="absolute right-3 top-3 pointer-events-none">
-                    {isUrlValid === true && <CheckCircle2 className="h-5 w-5 text-green-500" />}
-                    {isUrlValid === false && <AlertCircle className="h-5 w-5 text-red-500" />}
+                    {isUrlValid === true && (
+                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    )}
+                    {isUrlValid === false && (
+                      <AlertCircle className="h-5 w-5 text-red-500" />
+                    )}
                   </div>
                 </div>
-                <Button 
+                <Button
                   type="submit"
                   size="lg"
                   disabled={isLoading || !url.trim() || isUrlValid === false}
@@ -210,7 +230,7 @@ export const CreateUrlPage = () => {
                 </Button>
               </div>
               {error && (
-                <motion.p 
+                <motion.p
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-red-500 text-sm mt-2 ml-1"
@@ -237,7 +257,7 @@ export const CreateUrlPage = () => {
                     <TabsTrigger value="link">Short Link</TabsTrigger>
                     <TabsTrigger value="qrcode">QR Code</TabsTrigger>
                   </TabsList>
-                  
+
                   <TabsContent value="link" className="mt-0">
                     <Card>
                       <CardContent className="pt-4">
@@ -250,10 +270,14 @@ export const CreateUrlPage = () => {
                           >
                             {`${URL_SERVICE_API_BASE_URL}/${shortCode}`}
                           </a>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => copyToClipboard(`${URL_SERVICE_API_BASE_URL}/${shortCode}`)} 
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              copyToClipboard(
+                                `${URL_SERVICE_API_BASE_URL}/${shortCode}`
+                              )
+                            }
                             aria-label="Copy to clipboard"
                           >
                             {copied ? (
@@ -266,12 +290,15 @@ export const CreateUrlPage = () => {
                       </CardContent>
                     </Card>
                   </TabsContent>
-                  
+
                   <TabsContent value="qrcode" className="mt-0">
                     <Card>
                       <CardContent className="pt-4 flex justify-center">
                         <div className="p-4 bg-white rounded-lg">
-                          <QRCode value={`${URL_SERVICE_API_BASE_URL}/${shortCode}`} size={180} />
+                          <QRCode
+                            value={`${URL_SERVICE_API_BASE_URL}/${shortCode}`}
+                            size={180}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -297,10 +324,15 @@ export const CreateUrlPage = () => {
             <CardContent>
               <ul className="space-y-3">
                 {recentUrls.map((item, index) => (
-                  <li key={index} className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                  <li
+                    key={index}
+                    className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="space-y-1 truncate max-w-[70%]">
-                        <p className="text-sm text-muted-foreground truncate">{item.original}</p>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {item.original}
+                        </p>
                         <a
                           href={item.short}
                           target="_blank"

@@ -23,6 +23,7 @@ export interface TableProps {
     rows: RowContentProps[];
     pagination?: CustomPaginationProps;
     isLoading?: boolean;
-    className?: string
+    className?: string;
+    emptyStateContent?: ReactNode;
 }
 

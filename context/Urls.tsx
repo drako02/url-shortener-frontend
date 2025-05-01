@@ -5,113 +5,148 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
+  useRef,
   useState,
 } from "react";
 import { useAuth } from "./Auth";
 import { fetchRequest, logError, parseSearchParams } from "@/app/api/helpers";
-import { UrlContextProps, UrlData } from "@/app/types";
-import { usePathname } from "next/navigation";
+import { FilterProps, UrlContextProps, UrlData } from "@/app/types";
 import { URLResponse } from "@/app/api/types";
 import { toast } from "sonner";
+import qs from "qs";
+import { usePathname } from "next/navigation";
 
 const UrlsContext = createContext<UrlContextProps>({
   urls: new Map(),
-  allUrlsTotal: 0,
-  initializing: false,
+  totalUrlCount: 0,
+  initializing: true,
   updateUrls: async () => {},
+  filter: () => ({ queryString: "" }),
+  currentQueryString: "",
+  isNavigating: false,
+  setNavigatingState: () => {},
 });
 
 export const UrlsProvider = ({ children }: { children: React.ReactNode }) => {
-  // const [urls, setUrls] = useState<UrlData[]>([]);
   const [urls, setUrls] = useState<Map<number, UrlData>>(
     new Map<number, UrlData>()
   );
 
+  const urlsRef = useRef<Map<number, UrlData>>(urls);
+
   const [initializing, setInitializing] = useState<boolean>(true);
-  const [allUrlsTotal, setAllUrlsTotal] = useState<number>(0);
-  const [filterMode, setFilterMode] = useState<boolean>(false);
+  const [totalUrlCount, setTotalUrlCount] = useState<number>(0);
+  const filterModeRef = useRef(false);
+  const [currentQueryString, setCurrentQueryStrng] = useState<string>("");
+  const [isNavigating, setIsNavigating] = useState<boolean>(false);
+  // const [filterItems, setFilterItems] = useState<{
+  //   queryString: string;
+  //   params: FilterProps
+  // }>({
+  //   queryString: '',
+  //   params: {
+  //     filters: []
+  //   }
+  // });
 
-  const pathName = usePathname()
+  const totalUrlCountRef = useRef<number>(totalUrlCount);
 
+  useEffect(() => {
+    urlsRef.current = urls;
+    totalUrlCountRef.current = totalUrlCount;
+  }, [totalUrlCount, urls]);
+
+  useEffect(() => {
+    console.log("UrlsProvider initializing state:", initializing);
+  }, [initializing]);
+
+  // const params = useSearchParams()
+  // useEffect(() => {
+  //   return () => {
+  //     if (params) setInitializing(true);
+  //   };
+  // }, [params]);
+
+  const pathName = usePathname();
   const { user } = useAuth();
   const INITIAL_URLS_LIMIT = 10;
-  // console.log("lkjhfdd", urls)
   useEffect(() => {
-    const fetchInitialUrls = async () => {
-      try {
-        if (initializing === false) setInitializing(true);
+    if (pathName !== "/search") {
+      const fetchInitialUrls = async () => {
+        try {
+          if (initializing === false) setInitializing(true);
 
-        if (!user) return;
+          if (!user) return;
 
-        const { urls: fetchedUrls, recordCount } = await getShortUrls(
-          user.uid,
-          INITIAL_URLS_LIMIT,
-          0
-        );
-        console.log("Provider urls: ", fetchedUrls);
+          const { urls: fetchedUrls, recordCount } = await getShortUrls(
+            user.uid,
+            INITIAL_URLS_LIMIT,
+            0
+          );
 
-        setAllUrlsTotal(recordCount);
-        setUrls(() => {
-          const newMap = new Map();
-          fetchedUrls.forEach((url, index) => newMap.set(index, url));
-          return newMap;
-        });
-      } catch (error) {
-        logError({
-          context: " Fetching urls for Urls context provider",
-          error,
-          message:
-            error instanceof Error
-              ? error.message
-              : "Failed to fetch user urls",
-          logLevel: "error",
-        });
-      } finally {
-        setInitializing(false);
-      }
-    };
+          setTotalUrlCount(recordCount);
+          setUrls(() => {
+            const newMap = new Map();
+            fetchedUrls.forEach((url, index) => newMap.set(index, url));
+            return newMap;
+          });
+        } catch (error) {
+          logError({
+            context: " Fetching urls for Urls context provider",
+            error,
+            message:
+              error instanceof Error
+                ? error.message
+                : "Failed to fetch user urls",
+            logLevel: "error",
+          });
+        } finally {
+          setInitializing(false);
+        }
+      };
 
-    fetchInitialUrls();
-    console.log("user in url provider: ", user);
-  }, [user]);
+      fetchInitialUrls();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, pathName]);
+  const updateUrlsCallCountRef = useRef(0);
 
   const updateUrls = useCallback(
     async (limit: number, offset: number, queryString?: string) => {
-      console.log("update urls called");
-      console.log("OFFSET: ", offset);
-      if(queryString){
-        console.log("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKK")
-        setFilterMode(true)
-        urls.clear()
-        // setAllUrlsTotal(0)
-      }
-      if(!queryString && filterMode){
-        setFilterMode(false)
-        urls.clear()
-        // setAllUrlsTotal(0)
-      }
+      updateUrlsCallCountRef.current += 1;
+      console.log({ updateUrlsCallCountRef });
+      setInitializing(true);
 
       try {
-        setInitializing(true);
-        if (!user) return;
-        console.log({ allUrlsTotal, urlsMapSize: urls.size });
+        if (!user) {
+          return;
+        }
+        if (queryString) {
+          filterModeRef.current = true;
+        }
 
-        const pageSize = Math.min(limit, allUrlsTotal - offset);
+        if (!queryString && filterModeRef.current) {
+          filterModeRef.current = false;
+          // urls.clear();
+          setUrls(new Map());
+        }
+
+        const existingUrls = urlsRef.current;
+        const pageSize = Math.min(limit, totalUrlCountRef.current - offset);
         const hasDataForRequestedRange =
-          urls.size === allUrlsTotal ||
+          // urls.size === allUrlsTotal ||
+          pageSize > 0 &&
           Array.from({ length: pageSize }).every((_, i) =>
-            urls.has(offset + i)
+            existingUrls.has(offset + i)
           );
-      
-        console.log("update urls called got here");
-        if (!filterMode && hasDataForRequestedRange) return;
 
-        console.log("update urls called got herrrre??");
+        if (!filterModeRef.current && hasDataForRequestedRange) return;
 
-        let recordCount:number;
-        let newUrls:URLResponse[];
+        let recordCount: number;
+        let newUrls: URLResponse[];
 
-        if(!queryString ){
+        if (!queryString) {
           const { recordCount: _recordCount, urls } = await getShortUrls(
             user.uid,
             limit,
@@ -120,21 +155,19 @@ export const UrlsProvider = ({ children }: { children: React.ReactNode }) => {
           recordCount = _recordCount;
           newUrls = urls;
         } else {
-          console.log("filter update func called")
-          const res = await fetchFilterUrlsUrls(queryString) ?? { length: 0, urls: [] };
+          const res = (await fetchFilterUrlsUrls(queryString)) ?? {
+            length: 0,
+            urls: [],
+          };
           recordCount = res.length;
-          newUrls = res.urls
-          console.log({"filter content": [res.length, res.urls, queryString]})
+          newUrls = res.urls;
 
-
+          setUrls(new Map());
         }
 
-
         // Update the total count if needed
-        if (recordCount !== allUrlsTotal) {
-          console.log("update urls called recordCount check");
-
-          setAllUrlsTotal(recordCount);
+        if (recordCount !== totalUrlCountRef.current) {
+          setTotalUrlCount(recordCount);
         }
 
         setUrls((prevMap) => {
@@ -153,10 +186,24 @@ export const UrlsProvider = ({ children }: { children: React.ReactNode }) => {
           logLevel: "error",
         });
       } finally {
-        setInitializing(false);
+        setInitializing(() => {
+          console.log("Initialization state did set in finally");
+          return false;
+        });
+
+        console.log(
+          "Navigation state before setState in finally: ",
+          isNavigating
+        );
+        if (isNavigating) {
+          setIsNavigating(() => {
+            console.log("Navigation state did set in finally");
+            return false;
+          });
+        }
       }
     },
-    [allUrlsTotal, filterMode, urls, user]
+    [isNavigating, user]
   );
 
   const fetchFilterUrlsUrls = async (queryString: string) => {
@@ -165,21 +212,63 @@ export const UrlsProvider = ({ children }: { children: React.ReactNode }) => {
         "/api/urls",
         { method: "POST", body: parseSearchParams(queryString) }
       );
-      console.log("endres",res)
-      return res
+      return res;
     } catch (error) {
-        console.error("Error fetching URLs:", error);
-        toast.error("Failed to load URLs. Please try again.");
+      console.error("Error fetching URLs:", error);
+      toast.error("Failed to load URLs. Please try again.");
     }
   };
 
-  return (
-    <UrlsContext.Provider
-      value={{ urls, initializing, updateUrls, allUrlsTotal }}
-    >
-      {children}
-    </UrlsContext.Provider>
+  const filter = useCallback(
+    (props: FilterProps) => {
+      const { filters, offset, limit, sortBy, sortOrder } = props;
+      if (!user) {
+        throw new Error("Invalid user");
+      }
+      const uid = user.uid;
+      const queryString = qs.stringify(
+        {
+          filters,
+          offset,
+          limit,
+          sort_by: sortBy,
+          sort_order: sortOrder,
+          uid,
+        },
+        {
+          // Configure qs to handle arrays and objects properly
+          arrayFormat: "indices",
+          encode: true,
+          // Limit nesting for cleaner URLs
+          // depth: 4
+        }
+      );
+
+      setCurrentQueryStrng(queryString);
+      // setFilterItems({params: props, queryString})
+      return { queryString };
+    },
+    [user]
   );
+
+  const setNavigatingState = useCallback((state: boolean) => {
+    setIsNavigating(state);
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      urls,
+      initializing,
+      updateUrls,
+      totalUrlCount,
+      filter,
+      currentQueryString,
+      isNavigating,
+      setNavigatingState,
+    }),
+    [urls, initializing, updateUrls, totalUrlCount, filter, currentQueryString, isNavigating, setNavigatingState]
+  );
+  return <UrlsContext.Provider value={value}>{children}</UrlsContext.Provider>;
 };
 
 export const useUrls = () => {

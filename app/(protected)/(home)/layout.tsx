@@ -104,7 +104,7 @@ export default function HomeLayout({
         <AppSidebar title="URL Shortener" sideOptions={sideBarOptions} />
       </div>
 
-      <div className=" home-layout h-full w-full flex">{children}</div>
+      <div className=" home-layout h-full w-full flex flex-col">{children}</div>
     </div>
   );
 }
