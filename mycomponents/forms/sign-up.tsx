@@ -6,7 +6,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -56,7 +55,7 @@ export const SignUpForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const [passwordStrength, setPasswordStrength] = useState<number>(0);
 
-  const { createAccount, user, signIn } = useAuth();
+  const { createAccount, signIn } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {

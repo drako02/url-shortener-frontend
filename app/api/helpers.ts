@@ -172,6 +172,7 @@ export class APIError extends Error {
   }
 }
 
+/** does not pparse arrays well */
 export const parseSearchParams = (queryString: string) => {
   const parsed = qs.parse(queryString, {
     ignoreQueryPrefix: true,

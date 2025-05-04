@@ -4,11 +4,12 @@ import "./globals.css";
 import { ThemeProvider } from "../context/Theme";
 import { AuthProvider } from "../context/Auth";
 import { Toaster } from "@/components/ui/sonner";
+import { UrlsProvider } from "@/context/_Urls";
 // import { getUserFromCookies } from "./api/users/get";
 // import { mapToUser } from "./api/helpers";
 // import { UserProvider } from "@/context/User";
 // import { cookies } from "next/headers";
-import { UrlsProvider } from "@/context/Urls";
+// import { UrlsProvider } from "@/context/Urls";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

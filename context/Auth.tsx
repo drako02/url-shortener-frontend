@@ -58,10 +58,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // console.log(JSON.stringify(user));
 
   useEffect(() => {
-    if (user) {
-      // console.log("Returned because user already exists", user);
-      return;
-    }
+    // if (user) {
+    //   // console.log("Returned because user already exists", user);
+    //   return;
+    // }
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setInitializing(true);
@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = auth.onIdTokenChanged(async (user) => {

@@ -18,7 +18,8 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import QRCode from "react-qr-code";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useUrls } from "@/context/Urls";
+import { useUrls } from "@/context/_Urls";
+// import { useUrls } from "@/context/Urls";
 
 export const CreateUrlPage = () => {
   const [url, setUrl] = useState<string>("");
@@ -36,7 +37,7 @@ export const CreateUrlPage = () => {
   const { user } = useAuth();
 
   // Load recent URLs from localStorage on initial render
-  const { updateUrls, totalUrlCount: allUrlsTotal } = useUrls();
+  const { loadPage, totalUrlCount } = useUrls();
   useEffect(() => {
     const savedUrls = localStorage.getItem("recentUrls");
     if (savedUrls) {
@@ -117,9 +118,9 @@ export const CreateUrlPage = () => {
         validUrl,
         user?.uid as string
       );
-      console.log("totals, totals + 1: ", allUrlsTotal, allUrlsTotal + 1);
-      updateUrls(1, allUrlsTotal + 10);
-      console.log("ALLTOTALURLS + 1", allUrlsTotal + 1);
+      console.log("totals, totals + 1: ", totalUrlCount, totalUrlCount + 1);
+      loadPage(1, totalUrlCount);
+      console.log("ALLTOTALURLS + 1", totalUrlCount + 1);
 
       setShortCode(short_code);
       const shortUrl = `${URL_SERVICE_API_BASE_URL}/${short_code}`;

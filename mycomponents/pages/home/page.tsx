@@ -1,5 +1,5 @@
-import { SideListOptions } from "@/mycomponents/side-panels/side-panel"
-import { Home, Link, PlusCircle, Settings, User, ChevronRight } from "lucide-react"
+// import { SideListOptions } from "@/mycomponents/side-panels/side-panel"
+// import { Home, Link, PlusCircle, Settings, User, ChevronRight } from "lucide-react"
 
 export const UserHomepage = () => {
     return (
