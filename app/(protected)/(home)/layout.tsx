@@ -1,7 +1,7 @@
 "use client";
 import { useAuth } from "@/context/Auth";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { LoadingScreen } from "@/mycomponents/loaders/loading";
 import {
   AppSidebar,
@@ -15,6 +15,7 @@ import {
   User,
   ArrowLeftSquare,
 } from "lucide-react";
+import { MainHeader } from "@/mycomponents/headers/header";
 
 export default function HomeLayout({
   children,
@@ -98,13 +99,34 @@ export default function HomeLayout({
     },
   ];
 
-  return (
-    <div className="flex w-full h-full">
-      <div className="flex h-screen">
-        <AppSidebar title="URL Shortener" sideOptions={sideBarOptions} />
-      </div>
+  const headerOptions = sideBarOptions.flatMap((option) =>
+    option.options
+      .map((o) => ({
+        name: o.name,
+        icon: o.icon,
+        href: o.url || "#",
+      }))
+      .filter((o) => o.name !== "Sign out")
+  );
 
-      <div className=" home-layout h-full w-full flex flex-col">{children}</div>
-    </div>
+  // const headerOptions:{name:string; icon?: React.ReactElement; url?: string}[] = []
+  // sideBarOptions.forEach(option => headerOptions.push(...option.options.map(o => ({name: o.name, icon: o.icon, url: o.url}))))
+
+  return (
+    <>
+      <MainHeader useDefaultLinks={false} navs={headerOptions} className="md:hidden" />
+
+      <div className="flex w-full h-full">
+        {/* <div className="md:hidden">
+      </div> */}
+        <div className="flex h-screen">
+          <AppSidebar title="URL Shortener" sideOptions={sideBarOptions} />
+        </div>
+
+        <div className=" home-layout w-full flex flex-col flex-1 min-h-0">
+          {children}
+        </div>
+      </div>
+    </>
   );
 }

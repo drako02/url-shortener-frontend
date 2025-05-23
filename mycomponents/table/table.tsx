@@ -27,7 +27,7 @@ export const TableComponent = (props: TableProps) => {
         rowCount={8}
         columnCount={headers.length}
         showHeader={false}
-        className="w-full m-1"
+        className={cn("w-full m-1", className)}
         height={"80%"}
       />
     );
@@ -35,7 +35,7 @@ export const TableComponent = (props: TableProps) => {
 
   if (rows.length === 0 && !isLoading) {
     return (
-      <div className="w-full py-12 flex flex-col items-center justify-center border-[1px] rounded-lg">
+      <div className={cn("w-full py-12 flex flex-col items-center justify-center border-[1px] rounded-lg", className)}>
         <p className="text-lg text-gray-500">No data available</p>
         <p className="text-sm text-gray-400">There are no entries to display</p>
       </div>

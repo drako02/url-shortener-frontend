@@ -2,7 +2,7 @@ import { getShortUrls } from "@/app/api/urls/urls";
 import { UrlData } from "@/app/types";
 import { useAuth } from "@/context/Auth";
 import { safeFetch } from "@/lib/utils";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Fetches urls for a requested
@@ -11,16 +11,25 @@ import { useCallback, useState } from "react";
 export const usePaginatedUrls = (totalCount: number) => {
   const [pageUrls, setPageUrls] = useState<Map<number, UrlData>>(new Map());
   const [isLoading, setIsLoading] = useState<boolean>(false);
-//   const { updateTotalCount, totalCount: initialTotalCount } =
-//     useFetchIntialUrls();
-const [paginatedTotalCount, setTotalCount] = useState<number>(0);
+  const [totalUrlCount, setTotalUrlCount] = useState<number>(totalCount);
+  const [currentPage, setCurrentPage] = useState<{
+    limit: number;
+    offset: number;
+  } | null>(null);
+
+  const urlCacheRef = useRef<Map<number, UrlData>>(new Map());
 
   const { user } = useAuth();
 
+  useEffect(() => {
+    urlCacheRef.current = pageUrls;
+  }, [pageUrls]);
+
   const loadPage = useCallback(
     async (limit: number, offset: number) => {
-      console.log("LOADPAGE CALLED");
       if (!user) return;
+
+      setCurrentPage({ limit, offset });
 
       // Handles cases where last page might be lest that the limit
       const pageSize = Math.min(limit, totalCount - offset);
@@ -30,11 +39,9 @@ const [paginatedTotalCount, setTotalCount] = useState<number>(0);
       const alreadyLoaded =
         pageSize > 0 &&
         Array.from({ length: pageSize }).every((_, i) =>
-          pageUrls.has(offset + i)
+          urlCacheRef.current.has(offset + i)
         );
-      console.log({ alreadyLoaded, pageUrls, pageSize }, offset);
       if (alreadyLoaded) return;
-      console.log("LOAD PAGE PASSED RETURN");
 
       setIsLoading(true);
 
@@ -44,23 +51,77 @@ const [paginatedTotalCount, setTotalCount] = useState<number>(0);
       );
 
       if (data) {
+        const cache = new Map(urlCacheRef.current);
+        data.urls.forEach((url, index) => cache.set(offset + index, url));
+        urlCacheRef.current = cache;
+
         setPageUrls((prev) => {
           const m = new Map(prev);
           data.urls.forEach((url, index) => m.set(offset + index, url));
           return m;
         });
 
-        console.log({totalCount, "data count":data.recordCount})
         if (totalCount !== data.recordCount) {
-          setTotalCount(data.recordCount);
-          console.log("data.recordCount: ", data.recordCount, )
+          setTotalUrlCount(data.recordCount);
         }
       }
 
       setIsLoading(false);
     },
-    [pageUrls, totalCount, user]
+    [totalCount, user]
   );
 
-  return { pageUrls, isLoading, loadPage, paginatedTotalCount };
+  const refreshUrls = useCallback(async () => {
+    if (!user || !currentPage) return;
+
+    // Clear the cache for the current page range
+    const { limit, offset } = currentPage;
+    const cache = new Map(urlCacheRef.current);
+
+    for (let i = 0; i < limit; i++) {
+      cache.delete(offset + i);
+    }
+    urlCacheRef.current = cache;
+
+    setPageUrls(() => {
+      loadPage(limit, offset);
+      return cache;
+    });
+
+    // Reload the current page
+  }, [user, currentPage, loadPage]);
+
+  return {
+    pageUrls,
+    isLoading,
+    loadPage,
+    refreshUrls,
+    paginatedTotalCount: totalUrlCount,
+  };
 };
+
+// export const deleteUrl = async (id: number, auth: Auth) => {
+//   try {
+//     if (!auth.currentUser) {
+//       throw new Error("User not authenticated");
+//     }
+
+//     const token = await auth.currentUser.getIdToken();
+
+//     const res = await fetchRequest("/api/urls/", {
+//       method: "DELETE",
+//       headers: { Authorization: `Bearer ${token}` },
+//       body: { id },
+//     });
+
+//     return { success: true, data: res, error: null };
+//   } catch (error) {
+//     logError({
+//       context: "deleting url",
+//       error,
+//       message: "",
+//       logLevel: "error",
+//     });
+//     return { success: false, data: null, error };
+//   }
+// };

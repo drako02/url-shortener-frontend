@@ -16,16 +16,13 @@ export async function POST(request: NextRequest) {
     const formattedQuery = Object.fromEntries(
       Object.entries(body).filter(([, value]) => value != undefined)
     );
-    const res = await fetchRequest(
-      `${URL_SERVICE_API_BASE_URL}/urls`,
-      {
-        method: "POST",
-        body: formattedQuery,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const res = await fetchRequest(`${URL_SERVICE_API_BASE_URL}/urls`, {
+      method: "POST",
+      body: formattedQuery,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     return NextResponse.json(res, { status: 200 });
   } catch (error) {
@@ -42,5 +39,39 @@ export async function POST(request: NextRequest) {
       );
     }
     return NextResponse.json({ error: "Failed to get urls" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get("Authorization") || "";
+    const token = authHeader.startsWith("Bearer ")
+      ? authHeader.substring(7)
+      : "";
+
+    const body = (await request.json()) as { id: number };
+    const res = await fetchRequest(`${URL_SERVICE_API_BASE_URL}/urls`, {
+      method: "DELETE",
+      body,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return NextResponse.json(res, { status: 200 });
+  } catch (error) {
+    logError({
+      context: "Deleting url",
+      error,
+      message: "Failed to delete urls",
+      logLevel: "error",
+    });
+    if (error instanceof ApiError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode }
+      );
+    }
+    return NextResponse.json({ error: "Failed to delete urls" }, { status: 500 });
   }
 }

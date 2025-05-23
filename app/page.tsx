@@ -3,12 +3,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Zap, Clock, Lock } from "lucide-react";
+import { ArrowRight, Zap, Clock, Lock, LinkIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { MainHeader } from "@/mycomponents/headers/header";
+import { useAuth } from "@/context/Auth";
+
+
 
 export default function Home() {
+  const {isAuthenticated} = useAuth()
   const router = useRouter();
   const [isHovering, setIsHovering] = useState(false);
 
@@ -58,11 +62,12 @@ export default function Home() {
     },
   ];
 
+  const mobileHeaderOptions = [{name: "My Urls", href: "/user-urls", icon:<LinkIcon/> }]
 
   return (
     <>
-      <MainHeader />
-      <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl">
+      <MainHeader navs={isAuthenticated ? mobileHeaderOptions : []} />
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Hero Section */}
         <motion.div
           initial="hidden"

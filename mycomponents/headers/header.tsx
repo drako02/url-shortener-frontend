@@ -22,25 +22,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { LinkIcon, Menu, User, LogOut, ChevronDown, Home, Info, Zap } from "lucide-react";
+import {
+  LinkIcon,
+  Menu,
+  User,
+  LogOut,
+  ChevronDown,
+  Home,
+  Info,
+  Zap,
+} from "lucide-react";
 
 const protectedRoutes = ["/home", "/user-urls"];
 const excludeRoutes = ["/sign-in", "/sign-up"];
 
-export const MainHeader = () => {
+interface MainHeaderProps {
+  useDefaultLinks?: boolean;
+  navs?: { name: string; href: string, icon?:React.ReactElement  }[];
+  className?:string
+}
+export const MainHeader: React.FC<MainHeaderProps> = ({useDefaultLinks = true, navs, className}) => {
+
   const pathName = usePathname();
   const router = useRouter();
   const { user, signOut } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
   const showAuthButton = !excludeRoutes.includes(pathName);
-  const isProtectedRoute = protectedRoutes.some(route => pathName?.startsWith(route));
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    pathName?.startsWith(route)
+  );
   const isActive = (path: string) => pathName === path;
 
   const handleSignOut = async () => {
@@ -61,13 +74,15 @@ export const MainHeader = () => {
   }
 
   return (
-    <header className="fixed top-0 z-40 w-full border-b bg-white">
+    <header className={cn("sticky top-0 w-full border-b bg-white", className)}>
       <div className="container flex h-16 items-center justify-between">
         {/* Logo & Brand */}
         <div className="flex items-center gap-2 pl-[3%]">
           <Link href="/" className="flex items-center space-x-2">
             <LinkIcon className="h-6 w-6" />
-            <span className="hidden font-bold sm:inline-block">UrlShortener</span>
+            <span className="hidden font-bold sm:inline-block">
+              UrlShortener
+            </span>
           </Link>
         </div>
 
@@ -77,23 +92,27 @@ export const MainHeader = () => {
             <NavigationMenuList>
               <NavigationMenuItem>
                 <Link href="/" legacyBehavior passHref>
-                  <NavigationMenuLink className={cn(
-                    navigationMenuTriggerStyle(),
-                    isActive("/") && "font-medium text-primary"
-                  )}>
+                  <NavigationMenuLink
+                    className={cn(
+                      navigationMenuTriggerStyle(),
+                      isActive("/") && "font-medium text-primary"
+                    )}
+                  >
                     <Home className="mr-2 h-4 w-4" />
                     Home
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
-              
+
               {isProtectedRoute && (
                 <NavigationMenuItem>
                   <Link href="/user-urls" legacyBehavior passHref>
-                    <NavigationMenuLink className={cn(
-                      navigationMenuTriggerStyle(),
-                      isActive("/user-urls") && "font-medium text-primary"
-                    )}>
+                    <NavigationMenuLink
+                      className={cn(
+                        navigationMenuTriggerStyle(),
+                        isActive("/user-urls") && "font-medium text-primary"
+                      )}
+                    >
                       <LinkIcon className="mr-2 h-4 w-4" />
                       My URLs
                     </NavigationMenuLink>
@@ -126,10 +145,12 @@ export const MainHeader = () => {
 
               <NavigationMenuItem>
                 <Link href="/about" legacyBehavior passHref>
-                  <NavigationMenuLink className={cn(
-                    navigationMenuTriggerStyle(),
-                    isActive("/about") && "font-medium text-primary"
-                  )}>
+                  <NavigationMenuLink
+                    className={cn(
+                      navigationMenuTriggerStyle(),
+                      isActive("/about") && "font-medium text-primary"
+                    )}
+                  >
                     <Info className="mr-2 h-4 w-4" />
                     About
                   </NavigationMenuLink>
@@ -138,8 +159,8 @@ export const MainHeader = () => {
             </NavigationMenuList>
           </NavigationMenu>
 
-          {showAuthButton && (
-            user ? (
+          {showAuthButton &&
+            (user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="gap-2 flex items-center">
@@ -151,14 +172,14 @@ export const MainHeader = () => {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push('/user-urls')}>
+                  <DropdownMenuItem onClick={() => router.push("/user-urls")}>
                     My URLs
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push('/profile')}>
+                  <DropdownMenuItem onClick={() => router.push("/profile")}>
                     Profile Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={handleSignOut}
                     disabled={isLoggingOut}
                     className="text-destructive focus:text-destructive"
@@ -170,20 +191,12 @@ export const MainHeader = () => {
               </DropdownMenu>
             ) : (
               <div className="flex items-center gap-4">
-                <Button 
-                  variant="ghost"
-                  onClick={() => router.push("/sign-up")}
-                >
+                <Button variant="ghost" onClick={() => router.push("/sign-up")}>
                   Sign up
                 </Button>
-                <Button 
-                  onClick={() => router.push("/sign-in")}
-                >
-                  Sign in
-                </Button>
+                <Button onClick={() => router.push("/sign-in")}>Sign in</Button>
               </div>
-            )
-          )}
+            ))}
         </div>
 
         {/* Mobile Navigation */}
@@ -195,9 +208,9 @@ export const MainHeader = () => {
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right">
+            <SheetContent side="top" className="max-h-[90vh] overflow-y-auto">
               <nav className="flex flex-col gap-4 pt-4">
-                <Link 
+                <Link
                   href="/"
                   className={cn(
                     "flex items-center gap-2 px-2 py-1 text-lg font-medium rounded-md hover:bg-accent",
@@ -207,9 +220,9 @@ export const MainHeader = () => {
                   <Home className="h-5 w-5" />
                   Home
                 </Link>
-                
+
                 {isProtectedRoute && (
-                  <Link 
+                  <Link
                     href="/user-urls"
                     className={cn(
                       "flex items-center gap-2 px-2 py-1 text-lg font-medium rounded-md hover:bg-accent",
@@ -220,35 +233,49 @@ export const MainHeader = () => {
                     My URLs
                   </Link>
                 )}
-                
-                <Link 
-                  href="#features"
-                  className="flex items-center gap-2 px-2 py-1 text-lg font-medium rounded-md hover:bg-accent"
-                >
-                  <Zap className="h-5 w-5" />
-                  Features
-                </Link>
-                
-                <Link 
-                  href="/about"
-                  className={cn(
-                    "flex items-center gap-2 px-2 py-1 text-lg font-medium rounded-md hover:bg-accent",
-                    isActive("/about") && "bg-accent"
-                  )}
-                >
-                  <Info className="h-5 w-5" />
-                  About
-                </Link>
-                
+
+                {useDefaultLinks && (
+                  <>
+                    <Link
+                      href="#features"
+                      className="flex items-center gap-2 px-2 py-1 text-lg font-medium rounded-md hover:bg-accent"
+                    >
+                      <Zap className="h-5 w-5" />
+                      Features
+                    </Link>
+                    <Link
+                      href="/about"
+                      className={cn(
+                        "flex items-center gap-2 px-2 py-1 text-lg font-medium rounded-md hover:bg-accent",
+                        isActive("/about") && "bg-accent"
+                      )}
+                    >
+                      <Info className="h-5 w-5" />
+                      About
+                    </Link>{" "}
+                  </>
+                )}
+
+                {navs && navs.map((nav, index) => <>
+                  <Link
+                      href={nav.href}
+                      className="flex items-center gap-2 px-2 py-1 text-lg font-medium rounded-md hover:bg-accent"
+                      key={index}
+                    >
+                      {nav.icon && nav.icon}
+                      {nav.name}
+                    </Link>
+                </>)}
+
                 <div className="my-2 border-t" />
-                
+
                 {user ? (
                   <>
                     <div className="px-2 py-1 text-sm text-muted-foreground">
                       Signed in as {user.email}
                     </div>
-                    <Button 
-                      variant="destructive" 
+                    <Button
+                      variant="destructive"
                       onClick={handleSignOut}
                       disabled={isLoggingOut}
                       className="mt-2"
@@ -262,7 +289,10 @@ export const MainHeader = () => {
                     <Button onClick={() => router.push("/sign-up")}>
                       Sign up
                     </Button>
-                    <Button variant="outline" onClick={() => router.push("/sign-in")}>
+                    <Button
+                      variant="outline"
+                      onClick={() => router.push("/sign-in")}
+                    >
                       Sign in
                     </Button>
                   </div>

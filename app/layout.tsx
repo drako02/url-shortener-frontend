@@ -50,7 +50,6 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col h-full`}
       >
-        {/* <UserProvider initialUser={user}> */}
         <AuthProvider>
           <UrlsProvider>
             <ThemeProvider
@@ -59,15 +58,11 @@ export default async function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              {/* <div >
-                <MainHeader />
-              </div> */}
               <div className="flex-grow">{children}</div>
               <Toaster />
             </ThemeProvider>
           </UrlsProvider>
         </AuthProvider>
-        {/* </UserProvider> */}
       </body>
     </html>
   );

@@ -1,9 +1,7 @@
 "use client";
 import { mapToURL, URL_SERVICE_API_BASE_URL } from "@/app/api/helpers";
 import { ShortUrl, URLResponse } from "@/app/api/types";
-import { Button } from "@/components/ui/button";
 import { useUrls } from "@/context/_Urls";
-// import { useUrls } from "@/context/Urls";
 
 import { SearchInput } from "@/mycomponents/input/searchInput";
 import { TableComponent } from "@/mycomponents/table/table";
@@ -13,18 +11,20 @@ import {
   RowContentProps,
 } from "@/mycomponents/table/types";
 import { format, formatDistance } from "date-fns";
-import { Copy, Link as LinkIcon, Trash2 } from "lucide-react";
+import { Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { memo, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import { useEffect, useMemo, useState } from "react";
+import { Actions } from "../url/URLActions";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { URLCard } from "../card/card";
 
 export default function UserUrls() {
-
-  const {urls, totalUrlCount, initializing, loadPage, applyFilter} = useUrls()
+  const { urls, totalUrlCount, initializing, loadPage, applyFilter } =
+    useUrls();
   const [offset, setOffset] = useState<number>(0);
   const [searchValue, setSearchValue] = useState<string>("");
-  // const [valueForQuery, setValueForQuery] = useState<string>("");
+  const isMobile = useIsMobile();
 
   const limit = 10;
 
@@ -33,7 +33,7 @@ export default function UserUrls() {
 
   //Pagination
   const totalPages = useMemo(() => {
-    console.log("TOTAL URL COUNT FROM URLS COMPONENT: ", totalUrlCount)
+    console.log("TOTAL URL COUNT FROM URLS COMPONENT: ", totalUrlCount);
     return Math.ceil(totalUrlCount / limit);
   }, [totalUrlCount]);
 
@@ -61,37 +61,9 @@ export default function UserUrls() {
 
   useEffect(() => {
     if (pathName === "/user-urls") {
-      loadPage(limit, offset)
+      loadPage(limit, offset);
     }
   }, [loadPage, offset, pathName]);
-
-  const handlePageChange = (page: number) => {
-    const newOffset = (page - 1) * limit;
-    if (pathName === "/search") {
-      const filterType = pathName.slice(1);
-      console.log({ filterType });
-
-      if (filterType === "search" || filterType === "filter") {
-        console.log({newOffset, searchValue})
-        applyFilter(
-          {
-            filters: [
-              {
-                fields: ["short_code", "long_url"],
-                value: searchValue,
-                operator: "fulltext",
-              },
-            ],
-            limit,
-            offset: newOffset,
-          },
-          filterType
-        );
-      }
-    }
-    setOffset(newOffset);
-  };
-    
 
   const tableHeaders: HeaderContentProps = useMemo(
     () => [
@@ -112,36 +84,15 @@ export default function UserUrls() {
     []
   );
 
-  const Actions = memo(({ url }: { url: ShortUrl }) => {
-    return (
-      <div className="flex w-[80px] h-full">
-        <Button
-          asChild
-          variant="ghost"
-          className="h-[24px] p-1"
-          onClick={() =>
-            navigator.clipboard.writeText(
-              `${URL_SERVICE_API_BASE_URL}/${url.shortCode}`
-            )
-          }
-        >
-          <Copy size={"50%"} />
-        </Button>
-        <Button
-          asChild
-          variant="ghost"
-          className="h-[24px] p-1"
-          onClick={() => toast("To be deleted")}
-        >
-          <Trash2 size={"50%"} />
-        </Button>
-      </div>
-    );
-  });
-  Actions.displayName = "Actions";
+  const currentPageUrls: RowContentProps[] | ShortUrl[] = useMemo(() => {
+    const cardContent = Array.from({ length: limit })
+      .map((_, i) => {
+        return urls.get(pathName === "/user-urls" ? offset + i : i); // Will change later to make consistent
+      })
+      .filter((url): url is URLResponse => url !== undefined)
+      .map((url) => mapToURL(url));
 
-  const currentPageUrls: RowContentProps[] = useMemo(() => {
-    return Array.from({ length: limit })
+    const tableContent = Array.from({ length: limit })
       .map((_, i) => {
         return urls.get(pathName === "/user-urls" ? offset + i : i); // Will change later to make consistent
       })
@@ -177,16 +128,46 @@ export default function UserUrls() {
           { element: <Actions url={url} /> },
         ];
       });
-  }, [Actions, offset, pathName, urls]);
+    return isMobile ? cardContent : tableContent;
+  }, [isMobile, offset, pathName, urls]);
 
-  console.log({currentPageUrls, urls})
+  //Mobile Urls
+
+  console.log({ currentPageUrls, urls });
+
+  const handlePageChange = (page: number) => {
+    const newOffset = (page - 1) * limit;
+    if (pathName === "/search") {
+      const filterType = pathName.slice(1);
+      console.log({ filterType });
+
+      if (filterType === "search" || filterType === "filter") {
+        console.log({ newOffset, searchValue });
+        applyFilter(
+          {
+            filters: [
+              {
+                fields: ["short_code", "long_url"],
+                value: searchValue,
+                operator: "fulltext",
+              },
+            ],
+            limit,
+            offset: newOffset,
+          },
+          filterType
+        );
+      }
+    }
+    setOffset(newOffset);
+  };
 
   const handleSearch = async (value: string) => {
     setOffset(0);
     // setValueForQuery(value);
 
-
-      applyFilter({
+    applyFilter(
+      {
         filters: [
           {
             fields: ["short_code", "long_url"],
@@ -196,37 +177,43 @@ export default function UserUrls() {
         ],
         limit,
         offset: 0,
-      }, "search")
-  
-    // };
-
-    // router.push(`/search?${newQueryString}`);
+      },
+      "search"
+    );
   };
 
   return (
-    <>
+    <div className="">
       {pathName === "/search" && (
-        <div>
-          {" "}
-          Search Results for {params.get("filters[0][value]")}
-        </div>
+        <div> Search Results for {params.get("filters[0][value]")}</div>
       )}
-      <div className=" h-full w-full flex flex-col justify-start items-center pt-[1%]">
+      <div className=" h-full w-full flex flex-col justify-start items-center pt-[3%]">
         <div className="flex w-[95%] justify-end">
-          <SearchInput onSearch={handleSearch} onChange={setSearchValue} value={searchValue} />
+          <SearchInput
+            onSearch={handleSearch}
+            onChange={setSearchValue}
+            value={searchValue}
+          />
         </div>
         <TableComponent
           headers={tableHeaders}
-          rows={currentPageUrls}
+          rows={!isMobile ? (currentPageUrls as RowContentProps[]) : []}
           pagination={{
             totalPages,
             currentPage: Math.floor(offset / limit) + 1,
             onPageChangeAction: handlePageChange,
           }}
           isLoading={initializing}
-          className="w-[95%]"
+          className="w-[95%] hidden md:block"
         />
+
+        <div className="md:hidden flex flex-col gap-3 w-[90vw] py-2">
+          {isMobile &&
+            (currentPageUrls as ShortUrl[]).map((u, i) => (
+              <URLCard key={i} url={u} actions={<Actions url={u} className="flex-col w-auto justify-between" itemClassName=" w-[24px] aspect-[2/2]"/>} />
+            ))}
+        </div>
       </div>
-    </>
+    </div>
   );
 }

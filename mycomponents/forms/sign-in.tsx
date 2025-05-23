@@ -120,7 +120,7 @@ export const SigninForm = () => {
         <div className="flex justify-center mb-2">
           {/* Replace with your actual logo */}
           <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold">URL</span>
+            <span className="text-primary-foreground font-bold ">URL</span>
           </div>
         </div>
         <CardTitle className="text-2xl font-bold text-center">Sign in</CardTitle>

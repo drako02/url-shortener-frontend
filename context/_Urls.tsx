@@ -17,6 +17,7 @@ export type UrlContextProps = {
     param: FilterProps | string,
     filterType: "search" | "filter"
   ) => unknown;
+  refreshUrls: () => Promise<unknown>
 };
 const UrlsContext = createContext<UrlContextProps | undefined>(undefined);
 
@@ -31,6 +32,7 @@ export const UrlsProvider = ({ children }: { children: ReactNode }) => {
     pageUrls: paginatedMap,
     isLoading: paginatedLoading,
     loadPage,
+    refreshUrls,
     paginatedTotalCount: paginatedUrlTotalCount,
   } = usePaginatedUrls(initialUrlTotalCount);
 
@@ -72,6 +74,7 @@ export const UrlsProvider = ({ children }: { children: ReactNode }) => {
     loadPage,
     applyFilter,
     currentQueryString: filterQuery || "",
+    refreshUrls,
   };
 
   return (

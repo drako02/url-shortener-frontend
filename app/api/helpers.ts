@@ -42,7 +42,7 @@ export const fetchRequest = async <T>(
 
     if (!response.ok) {
       throw new APIError({
-        message: `HTTP error! status: ${response.status}`,
+        message: (await response.json()).error,
         method,
         url,
         status: response.status,
