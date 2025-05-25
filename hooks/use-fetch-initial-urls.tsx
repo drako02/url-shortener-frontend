@@ -13,11 +13,16 @@ export const useFetchIntialUrls = (pageSize: number = 10) => {
   const [totalCount, setTotalCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { user } = useAuth();
+  const { user, initializing: userInitializing } = useAuth();
 
   const loadInitial = useCallback(async () => {
-    if (!user) return;
     setIsLoading(true);
+
+    // if (userInitializing) setIsLoading(true);
+    if (!user ) {
+      setIsLoading(false);
+      return;
+    }
     const data = await safeFetch(
       () => getShortUrls(user.uid, pageSize, 0),
       "Fetch initial urls"

@@ -5,6 +5,7 @@ import { ThemeProvider } from "../context/Theme";
 import { AuthProvider } from "../context/Auth";
 import { Toaster } from "@/components/ui/sonner";
 import { UrlsProvider } from "@/context/_Urls";
+import { Suspense } from "react";
 // import { getUserFromCookies } from "./api/users/get";
 // import { mapToUser } from "./api/helpers";
 // import { UserProvider } from "@/context/User";
@@ -46,22 +47,24 @@ export default async function RootLayout({
   // console.log("User on layout main in component: ", user);
 
   return (
-    <html lang="en" className="h-full">
+    <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col h-full`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col max-w-screen min-h-screen`}
       >
         <AuthProvider>
-          <UrlsProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <div className="flex-grow">{children}</div>
-              <Toaster />
-            </ThemeProvider>
-          </UrlsProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Suspense>
+              <UrlsProvider>
+                <div className="flex-grow">{children}</div>
+                <Toaster />
+              </UrlsProvider>
+            </Suspense>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

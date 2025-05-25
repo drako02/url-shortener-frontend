@@ -72,8 +72,7 @@ const SideBarMain = (props: SideBarMainProps) => {
     <>
       <Sidebar
         className={cn(
-          "bg-card border-r border-border transition-all duration-100 mr-0",
-          open ? "w-[200px]" : "w-16"
+          "bg-card border-r border-border transition-all duration-100 mr-0", ""
         )}
         collapsible="icon"
       >
@@ -94,7 +93,7 @@ const SideBarMain = (props: SideBarMainProps) => {
             </SidebarTrigger>
           </div>
         </div>
-        <main className="flex flex-col justify-between items-center h-full ">
+        <div className="flex flex-col justify-between items-center h-full w-full">
           <div>
             {/* Header area with logo and trigger */}
 
@@ -246,7 +245,7 @@ const SideBarMain = (props: SideBarMainProps) => {
               {footer}
             </div>
           )}
-        </main>
+        </div>
       </Sidebar>
     </>
   );
@@ -255,7 +254,7 @@ const SideBarMain = (props: SideBarMainProps) => {
 export const AppSidebar = (props: SideBarMainProps) => {
   return (
     <div className="h-full">
-      <SidebarProvider defaultOpen>
+      <SidebarProvider defaultOpen className="">
         <SideBarMain {...props} />
       </SidebarProvider>
     </div>

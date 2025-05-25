@@ -25,7 +25,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const cookieStore = await cookies();
     cookieStore.set("session", idToken, {
       httpOnly: true,
-      maxAge: 60 * 60 * 24,
+      maxAge: 3600,
       path: "/",
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",

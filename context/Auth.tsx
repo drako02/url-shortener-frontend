@@ -64,6 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // }
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log("onAuthStateChanged Called")
       setInitializing(true);
       // console.log("Auth state firebase user: ", firebaseUser);
       if (!firebaseUser) {
@@ -85,9 +86,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setInitializing(false);
         });
     });
-
     return () => unsubscribe();
   }, []);
+
+  ///////////////////
+  // useEffect(() => console.log({initializing, }), [initializing])
+  // useEffect(() => console.log({user, }), [user])
 
   useEffect(() => {
     const unsubscribe = auth.onIdTokenChanged(async (user) => {
@@ -99,6 +103,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => unsubscribe()
   }, [])
+
 
   const signIn = async (props: SignIn): Promise<string> => {
     setInitializing(true);

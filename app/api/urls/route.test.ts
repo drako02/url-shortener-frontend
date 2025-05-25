@@ -47,7 +47,7 @@ describe("DELETE /api/urls", () => {
       json: jest.fn().mockResolvedValue({ id: 123 }),
     };
 
-    const response = await DELETE(mockRequest as unknown as NextRequest);
+    await DELETE(mockRequest as unknown as NextRequest);
 
     expect(mockRequest.headers.get).toHaveBeenCalledWith("Authorization");
     expect(mockRequest.json).toHaveBeenCalled();

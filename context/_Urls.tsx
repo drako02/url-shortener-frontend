@@ -1,6 +1,13 @@
 "use client";
 import { FilterProps, UrlData } from "@/app/types";
-import { createContext, ReactNode, useContext, useMemo } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useFetchIntialUrls } from "@/hooks/use-fetch-initial-urls";
 import { usePaginatedUrls } from "@/hooks/use-paginated-urls";
 import { useUrlFilters } from "@/hooks/use-urls-filters";
@@ -17,7 +24,7 @@ export type UrlContextProps = {
     param: FilterProps | string,
     filterType: "search" | "filter"
   ) => unknown;
-  refreshUrls: () => Promise<unknown>
+  refreshUrls: () => Promise<unknown>;
 };
 const UrlsContext = createContext<UrlContextProps | undefined>(undefined);
 
@@ -44,7 +51,21 @@ export const UrlsProvider = ({ children }: { children: ReactNode }) => {
     filterResultCount,
   } = useUrlFilters();
 
-  const initializing = initialLoading || paginatedLoading || filterLoading;
+  /** This state and it's effect helps prevent the empty state
+   * that shows when the browser renders cached files which results in empty urls
+   * example you refresh the page and and before the refresh is done , the browser uses cached files(html, css, js) but this files
+   * have no urls.
+   */
+  const [idle, setIdle] = useState(true);
+  useEffect(() => {
+    if (!initialLoading && initialUrls) {
+      setIdle(false);
+    }
+  }, [initialLoading, initialUrls]);
+  // const loadingState =
+
+  const initializing =
+    idle || initialLoading || paginatedLoading || filterLoading;
   //   const isFiltering = Boolean(filterQuery);
 
   const pathname = usePathname();

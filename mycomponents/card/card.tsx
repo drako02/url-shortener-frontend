@@ -1,10 +1,12 @@
 import { URL_SERVICE_API_BASE_URL } from "@/app/api/helpers";
-import { ShortUrl, URLResponse } from "@/app/api/types";
+import { ShortUrl } from "@/app/api/types";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { format, formatDate } from "date-fns";
-import { LinkIcon } from "lucide-react";
+import { format } from "date-fns";
+import { useMemo } from "react";
+import { ExternalLink, Copy } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface URLCardProps {
   url: ShortUrl;
@@ -12,48 +14,98 @@ interface URLCardProps {
   actions?: React.ReactElement;
 }
 
-const flex = {
-  rowCenter: "flex flex-row justify-center items-center",
-  columnCenter: "flex flex-col justify-center items-center",
-  columnBetween: "flex flex-col justify-between items-center",
-};
-export const URLCard: React.FC<URLCardProps> = ({ url, className, actions }) => {
-  const randomColor = getRandomColor(url.shortCode);
-  const randomColorTW = `bg-[${randomColor}]`;
-  console.log({ randomColorTW });
+export const URLCard: React.FC<URLCardProps> = ({
+  url,
+  className,
+  actions,
+}) => {
+  const randomColor = useMemo(() => getRandomColor(url.shortCode), [url.shortCode]);
+  
+  // Determine if text should be white or black based on background color
+  const textColor = useMemo(() => {
+    const r = parseInt(randomColor.slice(1, 3), 16);
+    const g = parseInt(randomColor.slice(3, 5), 16);
+    const b = parseInt(randomColor.slice(5, 7), 16);
+    return (r * 0.299 + g * 0.587 + b * 0.114) > 186 ? 'text-gray-800' : 'text-white';
+  }, [randomColor]);
+
+  const shortUrl = `${URL_SERVICE_API_BASE_URL}/${url.shortCode}`;
+  const domain = (URL_SERVICE_API_BASE_URL as string).replace(/^https?:\/\//, '');
+  
 
   return (
-    <>
-      <Card className={cn(" card w-[90vw] h-28", className)}>
-        <CardContent className=" h-full p-0">
-          <div className=" div-1 flex  h-full justify-between items- px-4 py-4">
-            <div className="h-full w-[12%]  flex flex-col justify-between">
-              {/* <LinkIcon /> */}
-              <Badge
-                className={cn(" aspect-[1] text-[1.5em] ", flex.rowCenter)}
-                style={{ backgroundColor: randomColor }}
-              >
-                {" "}
-                {url.shortCode.slice(0, 1).toUpperCase()}{" "}
-              </Badge>
-              <p className="text-center ">{"#" + url.id}</p>
+    <Card className={cn("w-full overflow-hidden transition-all duration-200 hover:shadow-md", className)}>
+      <CardContent className="p-0">
+        <div className="flex items-stretch h-full">
+          {/* Left color badge section */}
+          <div className="hidden xxs:flex flex-col items-center justify-center px-3 py-4" 
+               style={{ backgroundColor: `${randomColor}20` /* 20% opacity */ }}>
+            <div className="flex items-center justify-center w-12 h-12 rounded-full mb-1.5 shadow-sm"
+                 style={{ backgroundColor: randomColor }}>
+              <span className={cn("text-xl font-bold", textColor)}>
+                {url.shortCode.slice(0, 1).toUpperCase()}
+              </span>
             </div>
-
-            <div className={cn(flex.columnBetween, "items-start ")}>
-              <p className="text-[0.8rem] font-medium text-gray-500">
-                {format(url.createdAt, "dd MMM yyyy")}
-              </p>
-              <h1 className="font-bold">{`${URL_SERVICE_API_BASE_URL}/${url.shortCode}`}</h1>
-              <p className="max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap font-[650] text-[0.9rem] text-gray-400">
-                {url.originalUrl}
-              </p>
-            </div>
-
-            <div>{actions}</div>
+            <span className="text-xs font-medium text-gray-500 bg-white/80 px-2 py-0.5 rounded">
+              #{url.id}
+            </span>
           </div>
-        </CardContent>
-      </Card>
-    </>
+
+          {/* Middle content section */}
+          <div className="flex-1 flex flex-col justify-between p-4 min-w-0">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                {format(url.createdAt, "dd MMM yyyy")}
+              </span>
+              <span className="xxs:hidden text-xs font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                #{url.id}
+              </span>
+            </div>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a 
+                    href={shortUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-1 font-medium text-primary hover:text-primary/80"
+                  >
+                    <span className="truncate">
+                      {domain}/<span className="font-bold">{url.shortCode}</span>
+                    </span>
+                    <ExternalLink className="h-3.5 w-3.5 opacity-50 group-hover:opacity-100 transition-opacity" />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Open shortened URL</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="text-sm text-gray-500 truncate max-w-full mt-1 cursor-help">
+                    {url.originalUrl}
+                  </p>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{url.originalUrl}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+
+          {/* Right actions section */}
+          {actions && (
+            <div className="flex items-center border-l border-gray-100 bg-gray-50/50 px-3 py-3">
+              {actions}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

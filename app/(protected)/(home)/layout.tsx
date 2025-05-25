@@ -1,7 +1,7 @@
 "use client";
 import { useAuth } from "@/context/Auth";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { LoadingScreen } from "@/mycomponents/loaders/loading";
 import {
   AppSidebar,
@@ -49,9 +49,19 @@ export default function HomeLayout({
     console.log("Auth condition user: ", user);
   }, [initializing, router, user]);
 
-  if (initializing) return <LoadingScreen />;
+  // if (initializing) return <LoadingScreen />;
 
-  if (!initializing && !user) {
+  useEffect(() => {
+    if (initializing && user) {
+      console.log("🔄 INITIALIZING WITH USER:", { user });
+    }
+    
+    if (initializing && !user) {
+      console.log("⏳ INITIALIZING WITHOUT USER");
+    }
+  }, [initializing, user]);
+
+  if (initializing && !user) {
     return <LoadingScreen />; // Show loading during redirect
   }
 
@@ -119,9 +129,9 @@ export default function HomeLayout({
       <div className="flex w-full h-full">
         {/* <div className="md:hidden">
       </div> */}
-        <div className="flex h-screen">
-          <AppSidebar title="URL Shortener" sideOptions={sideBarOptions} />
-        </div>
+        {/* <div className=" h-screen" style={{ width: 200 }}> */}
+          <AppSidebar title="URL Shortener" sideOptions={sideBarOptions}/>
+        {/* </div> */}
 
         <div className=" home-layout w-full flex flex-col flex-1 min-h-0">
           {children}

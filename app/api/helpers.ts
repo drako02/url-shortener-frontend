@@ -12,7 +12,6 @@ interface RequestOptions {
 
 export const URL_SERVICE_API_BASE_URL = process.env.NEXT_PUBLIC_GO_SERVICE_BASE_URL;
 export const ANALYTICS_SERVICE_BASE_URL = process.env.NEXT_PUBLIC_ANALYTICS_SERVICE_BASE_URL;
-console.log({GO_SERVICE_BASE_URL: URL_SERVICE_API_BASE_URL, ANALYTICS_SERVICE_BASE_URL})
 
 
 export const fetchRequest = async <T>(
