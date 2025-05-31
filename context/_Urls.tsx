@@ -33,6 +33,7 @@ export const UrlsProvider = ({ children }: { children: ReactNode }) => {
     pageUrlMap: initialUrls,
     totalCount: initialUrlTotalCount,
     isLoading: initialLoading,
+    loadInitial,
   } = useFetchIntialUrls(DEFAULT_PAGE_SIZE);
 
   const {
@@ -79,14 +80,23 @@ export const UrlsProvider = ({ children }: { children: ReactNode }) => {
     ? new Map(filteredList.map((u, i) => [i, u]))
     : mainUrls;
   console.log("FILTERED LIST IN NEW CONTEXT: ", filteredList);
-  /** The total count multiple source of true for the lse of the tenary is
+  /** The total count multiple source of true for the else  part of the tenary is
    * because when changes to the urls(creation and deletion) are made the total count of
    * the initialFetch becomes stale and the paginated becomes the up-to-date total
    * But @note we can refactor to set the total from initial urls hook to make things consistent
    */
   const totalUrlCount = _isFiltering
     ? filterResultCount
-    : paginatedUrlTotalCount || initialUrlTotalCount;
+    : initialUrlTotalCount;
+
+    // Since we are using the etotal of intialUrls, when total changes from the paginated urls, we have to get the current urls from the initial
+useEffect(() => {
+  if(_isFiltering) return
+ if(totalUrlCount !== paginatedUrlTotalCount ){
+  loadInitial()
+ }
+
+},[_isFiltering, loadInitial, paginatedUrlTotalCount, totalUrlCount])
 
   const contextValue: UrlContextProps = {
     urls,

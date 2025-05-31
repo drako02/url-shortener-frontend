@@ -1,6 +1,5 @@
 import { auth } from "@/firebaseConfig";
 import { URLResponse, ShortUrl, User, UserResponse } from "./types";
-import { ApiError } from "next/dist/server/api-utils";
 import qs from "qs";
 
 interface RequestOptions {
@@ -8,27 +7,36 @@ interface RequestOptions {
   headers?: HeadersInit;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: Record<string, any>;
+  timeout?: number;
 }
 
-export const URL_SERVICE_API_BASE_URL = process.env.NEXT_PUBLIC_GO_SERVICE_BASE_URL;
-export const ANALYTICS_SERVICE_BASE_URL = process.env.NEXT_PUBLIC_ANALYTICS_SERVICE_BASE_URL;
-
+export const URL_SERVICE_API_BASE_URL =
+  process.env.NEXT_PUBLIC_GO_SERVICE_BASE_URL;
+export const ANALYTICS_SERVICE_BASE_URL =
+  process.env.NEXT_PUBLIC_ANALYTICS_SERVICE_BASE_URL;
 
 export const fetchRequest = async <T>(
   url: string,
   options: RequestOptions
-): Promise<T > => {
+): Promise<T> => {
   const { method = "GET", headers = {}, body } = options;
 
   console.log(`🚀 API Request: ${method} ${url}`, {
     method,
     headers,
-    body: body || 'no body',
+    body: body || "no body",
   });
 
   try {
-    const token = await auth.currentUser?.getIdToken()
-    console.log({token, currentUser: auth.currentUser})
+    const token = await auth.currentUser?.getIdToken();
+    console.log({ token, currentUser: auth.currentUser });
+
+    const abortController = new AbortController();
+    const timeOutId = setTimeout(
+      () => abortController.abort(),
+      options.timeout ?? 10000
+    );
+
     const response = await fetch(url, {
       headers: {
         "Content-Type": "application/json",
@@ -37,16 +45,23 @@ export const fetchRequest = async <T>(
       },
       method,
       body: body ? JSON.stringify(body) : undefined,
+      signal: abortController.signal,
     });
 
+    clearTimeout(timeOutId);
+
     if (!response.ok) {
+      const errorData = (await response.json().catch(() => null)) || {
+        error: "Unknown error",
+      };
+
       throw new APIError({
-        message: (await response.json()).error,
+        message: errorData.error,
         method,
         url,
         status: response.status,
         statusText: response.statusText,
-        responseBody: await response.text().catch(() => null)
+        responseBody: errorData,
       });
     }
 
@@ -61,15 +76,25 @@ export const fetchRequest = async <T>(
       console.log(`📦 API Response Data:`, jsonResponse);
       return jsonResponse;
     }
-    console.log("returned text")
+    console.log("returned text");
     return response.text() as Promise<T>;
-    
   } catch (error) {
-    throw error instanceof ApiError ? error :  new APIError({
-      message: "An error occurred during the request",
-      method,
-      url
+
+    logError({
+      context: "API request",
+      error,
+      message: error instanceof Error ? error.message : "API request failed",
+      logLevel: "error"
     });
+
+    throw error instanceof APIError
+      ? error
+      : new APIError({
+          message: "An error occurred during the request",
+          method,
+          url,
+          status: 500
+        });
   }
 };
 
@@ -95,7 +120,10 @@ type LogErrorParams = {
 };
 
 export const logError = ({
-  context, error, message, logLevel,
+  context,
+  error,
+  message,
+  logLevel,
 }: LogErrorParams) => {
   const errorLog: ErrorLog = {
     message,
@@ -113,7 +141,8 @@ export const mapToURL = (backendURL: URLResponse): ShortUrl => ({
   originalUrl: backendURL.long_url,
   createdAt: new Date(backendURL.created_at),
   updatedAt: new Date(backendURL.updated_at),
-  userId: backendURL.user_id
+  userId: backendURL.user_id,
+  active: backendURL.active
 });
 
 export class APIError extends Error {
@@ -143,7 +172,7 @@ export class APIError extends Error {
     requestBody?: unknown;
   }) {
     super(message);
-    this.name = 'APIError';
+    this.name = "APIError";
     this.status = status;
     this.statusText = statusText;
     this.method = method;
@@ -177,7 +206,7 @@ export const parseSearchParams = (queryString: string) => {
     ignoreQueryPrefix: true,
   });
 
-// return parsed
+  // return parsed
   return {
     filters: parsed.filters,
     limit: Number(parsed.limit) || 10,
@@ -187,3 +216,15 @@ export const parseSearchParams = (queryString: string) => {
     uid: parsed.uid,
   };
 };
+
+export interface APIResponse<T> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  errors?: Record<string, string[]>;
+  meta?: {
+    requestId?: string;
+    timestamp?: string;
+    [key: string]: unknown;
+  };
+}

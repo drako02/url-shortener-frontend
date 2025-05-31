@@ -19,12 +19,19 @@ export const usePaginatedUrls = (totalCount: number) => {
 
   const urlCacheRef = useRef<Map<number, UrlData>>(new Map());
 
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     urlCacheRef.current = pageUrls;
   }, [pageUrls]);
 
+  useEffect(() => {
+    if(!isAuthenticated){
+      setPageUrls(new Map())
+    }
+  }, [isAuthenticated])
+
+  console.log({ pageUrls });
   const loadPage = useCallback(
     async (limit: number, offset: number) => {
       if (!user) return;
@@ -37,10 +44,11 @@ export const usePaginatedUrls = (totalCount: number) => {
       // skip fetch if we already have data in state
       // page size can be >= 0 depending on offset value
       const alreadyLoaded =
-        pageSize > 0 &&
-        Array.from({ length: pageSize }).every((_, i) =>
-          urlCacheRef.current.has(offset + i)
-        );
+        offset === 0 ||
+        (pageSize > 0 &&
+          Array.from({ length: pageSize }).every((_, i) =>
+            urlCacheRef.current.has(offset + i)
+          ));
       if (alreadyLoaded) return;
 
       setIsLoading(true);

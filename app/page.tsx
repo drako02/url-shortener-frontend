@@ -144,7 +144,7 @@ export default function Home() {
 
                   <div className="p-4">
                     <Image
-                      src="/url-shortener-example.png"
+                      src={""}
                       alt="URL Shortener in action"
                       width={48}
                       height={48}

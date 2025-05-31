@@ -35,6 +35,34 @@ type AuthContextProps = {
   isAuthenticated: boolean;
 };
 
+const saveTokenAndUid = async (token: string) => {
+  try {
+    // console.log("firebasetoken: ",{token})
+    const res = await fetch("/api/auth", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ idToken: token }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(
+        `Authentication failed: ${errorData.message || res.statusText}`
+      );
+    }
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to save data on server", { cause: error });
+  }
+};
+
+const cleanupOnLogout = () => {
+  localStorage.removeItem("recentUrls");
+  // Add any future cleanup tasks here
+};
+
 export const AuthContext = React.createContext<AuthContextProps>({
   user: undefined,
   signIn: async () => undefined,
@@ -64,10 +92,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // }
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      console.log("onAuthStateChanged Called")
+      console.log("onAuthStateChanged Called");
       setInitializing(true);
       // console.log("Auth state firebase user: ", firebaseUser);
       if (!firebaseUser) {
+        cleanupOnLogout()
         setUser(undefined);
         setInitializing(false);
         return;
@@ -95,15 +124,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = auth.onIdTokenChanged(async (user) => {
-      if(user) {
+      if (user) {
         const newToken = await user.getIdToken();
         await saveTokenAndUid(newToken);
       }
-    })
+    });
 
-    return () => unsubscribe()
-  }, [])
-
+    return () => unsubscribe();
+  }, []);
 
   const signIn = async (props: SignIn): Promise<string> => {
     setInitializing(true);
@@ -139,7 +167,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             return firebaseUser.uid;
           }
         } catch (error) {
-          console.error(error)
+          console.error(error);
           const idToken = await firebaseUser.getIdToken();
 
           const existingUser = await getUser(firebaseUser.uid, idToken);
@@ -191,7 +219,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       method: "DELETE",
       credentials: "include",
     });
-    localStorage.removeItem("recentUrls")
     await signUserOut();
   };
   return (
@@ -216,27 +243,4 @@ export const useAuth = () => {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-};
-
-const saveTokenAndUid = async (token: string) => {
-  try {
-    // console.log("firebasetoken: ",{token})
-    const res = await fetch("/api/auth", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ idToken: token }),
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(
-        `Authentication failed: ${errorData.message || res.statusText}`
-      );
-    }
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to save data on server", { cause: error });
-  }
 };

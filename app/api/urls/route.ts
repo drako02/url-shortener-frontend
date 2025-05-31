@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { UrlQuery } from "../types";
-import { fetchRequest, logError, URL_SERVICE_API_BASE_URL } from "../helpers";
-import { ApiError } from "next/dist/server/api-utils";
+import { APIError, fetchRequest, logError, URL_SERVICE_API_BASE_URL } from "../helpers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,10 +31,10 @@ export async function POST(request: NextRequest) {
       message: "Failed to get urls",
       logLevel: "error",
     });
-    if (error instanceof ApiError) {
+    if (error instanceof APIError) {
       return NextResponse.json(
         { error: error.message },
-        { status: error.statusCode }
+        { status: error.status }
       );
     }
     return NextResponse.json({ error: "Failed to get urls" }, { status: 500 });
@@ -66,10 +65,10 @@ export async function DELETE(request: NextRequest) {
       message: "Failed to delete urls",
       logLevel: "error",
     });
-    if (error instanceof ApiError) {
+    if (error instanceof APIError) {
       return NextResponse.json(
         { error: error.message },
-        { status: error.statusCode }
+        { status: error.status }
       );
     }
     return NextResponse.json({ error: "Failed to delete urls" }, { status: 500 });

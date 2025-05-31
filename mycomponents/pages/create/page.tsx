@@ -36,8 +36,9 @@ export const CreateUrlPage = () => {
 
   const { user } = useAuth();
 
-  // Load recent URLs from localStorage on initial render
   const { loadPage, totalUrlCount } = useUrls();
+
+  // Load recent URLs from localStorage on initial render
   useEffect(() => {
     const savedUrls = localStorage.getItem("recentUrls");
     if (savedUrls) {

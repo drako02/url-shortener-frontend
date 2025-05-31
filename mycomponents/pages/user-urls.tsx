@@ -55,7 +55,7 @@ export default function UserUrls() {
 
   // Load page data
   useEffect(() => {
-    if (pathName === "/user-urls") {
+    if (pathName === "/user-urls"  && offset !== 0)   {
       loadPage(limit, offset);
     }
   }, [loadPage, offset, pathName]);

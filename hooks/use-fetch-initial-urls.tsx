@@ -13,7 +13,7 @@ export const useFetchIntialUrls = (pageSize: number = 10) => {
   const [totalCount, setTotalCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { user, initializing: userInitializing } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const loadInitial = useCallback(async () => {
     setIsLoading(true);
@@ -23,6 +23,7 @@ export const useFetchIntialUrls = (pageSize: number = 10) => {
       setIsLoading(false);
       return;
     }
+    
     const data = await safeFetch(
       () => getShortUrls(user.uid, pageSize, 0),
       "Fetch initial urls"
@@ -47,9 +48,15 @@ export const useFetchIntialUrls = (pageSize: number = 10) => {
   console.log("TOTAL COUUNT FROM INITIAL URL: ", totalCount)
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setPageUrlMap(new Map());
+      setTotalCount(0);
+      console.log("User not authenticated, resetting state");
+      return;
+    }
     loadInitial();
     console.log("loadInitial called");
-  }, [loadInitial]);
+  }, [loadInitial, isAuthenticated]);
 
   console.log("INITIAL URLS FROM HOOK: ", pageUrlMap);
 
