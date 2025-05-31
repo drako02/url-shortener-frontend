@@ -55,7 +55,7 @@ export default function UserUrls() {
 
   // Load page data
   useEffect(() => {
-    if (pathName === "/user-urls"  && offset !== 0)   {
+    if (pathName === "/user-urls")   {
       loadPage(limit, offset);
     }
   }, [loadPage, offset, pathName]);
@@ -85,14 +85,14 @@ export default function UserUrls() {
   const currentPageUrls: RowContentProps[] | ShortUrl[] = useMemo(() => {
     const cardContent = Array.from({ length: limit })
       .map((_, i) => {
-        return urls.get(pathName === "/user-urls" ? offset + i : i);
+        return urls?.get(pathName === "/user-urls" ? offset + i : i);
       })
       .filter((url): url is URLResponse => url !== undefined)
       .map((url) => mapToURL(url));
 
     const tableContent = Array.from({ length: limit })
       .map((_, i) => {
-        return urls.get(pathName === "/user-urls" ? offset + i : i);
+        return urls?.get(pathName === "/user-urls" ? offset + i : i);
       })
       .filter((url): url is URLResponse => url !== undefined)
       .map((url) => mapToURL(url))

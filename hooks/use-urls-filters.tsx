@@ -31,6 +31,8 @@ export const useUrlFilters = () => {
    */
   const applyFilter = useCallback(
     async (param: FilterProps | string, filterType: "search" | "filter") => {
+      setIsLoading(true);
+
       console.log("APPLYFILTER CALLED");
       if (!user) return;
 
@@ -57,7 +59,7 @@ export const useUrlFilters = () => {
         console.log("BUILT QUERY", currentQuery);
       }
 
-      setIsLoading(true);
+      // setIsLoading(true);
 
       const res = await safeFetch(
         () =>

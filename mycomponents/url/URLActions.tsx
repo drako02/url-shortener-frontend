@@ -214,8 +214,3 @@ const useToggleActive = (id: number, initial: boolean) => {
 
   return {active, updating,  updateActiveState}
 };
-
-const useDelete = (id: number) => {
-  const [deleting, setDeleting] = useState(false)
-
-}

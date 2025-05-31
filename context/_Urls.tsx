@@ -5,7 +5,7 @@ import {
   ReactNode,
   useContext,
   useEffect,
-  useMemo,
+  // useMemo,
   useState,
 } from "react";
 import { useFetchIntialUrls } from "@/hooks/use-fetch-initial-urls";
@@ -15,7 +15,7 @@ import { usePathname } from "next/navigation";
 
 const DEFAULT_PAGE_SIZE = 10;
 export type UrlContextProps = {
-  urls: Map<number, UrlData>;
+  urls: Map<number, UrlData> | null;
   totalUrlCount: number;
   initializing: boolean;
   currentQueryString: string;
@@ -29,12 +29,12 @@ export type UrlContextProps = {
 const UrlsContext = createContext<UrlContextProps | undefined>(undefined);
 
 export const UrlsProvider = ({ children }: { children: ReactNode }) => {
-  const {
-    pageUrlMap: initialUrls,
-    totalCount: initialUrlTotalCount,
-    isLoading: initialLoading,
-    loadInitial,
-  } = useFetchIntialUrls(DEFAULT_PAGE_SIZE);
+  // const {
+  //   pageUrlMap: initialUrls,
+  //   totalCount: initialUrlTotalCount,
+  //   isLoading: initialLoading,
+  //   loadInitial,
+  // } = useFetchIntialUrls(DEFAULT_PAGE_SIZE);
 
   const {
     pageUrls: paginatedMap,
@@ -42,7 +42,7 @@ export const UrlsProvider = ({ children }: { children: ReactNode }) => {
     loadPage,
     refreshUrls,
     paginatedTotalCount: paginatedUrlTotalCount,
-  } = usePaginatedUrls(initialUrlTotalCount);
+  } = usePaginatedUrls();
 
   const {
     filterQuery,
@@ -58,27 +58,37 @@ export const UrlsProvider = ({ children }: { children: ReactNode }) => {
    * have no urls.
    */
   const [idle, setIdle] = useState(true);
+  // useEffect(() => {
+  //   if (!initialLoading && initialUrls) {
+  //     setIdle(false);
+  //   }
+  // }, [initialLoading, initialUrls]);
+
   useEffect(() => {
-    if (!initialLoading && initialUrls) {
+    if (!paginatedLoading && paginatedMap) {
       setIdle(false);
     }
-  }, [initialLoading, initialUrls]);
+  }, [paginatedLoading, paginatedMap]);
+
+  
   // const loadingState =
 
   const initializing =
-    idle || initialLoading || paginatedLoading || filterLoading;
+    idle || paginatedLoading || filterLoading;
   //   const isFiltering = Boolean(filterQuery);
 
   const pathname = usePathname();
   const _isFiltering = pathname === "/search"; // Update if a filter route is created
 
-  const mainUrls = useMemo(() => {
-    return new Map([...initialUrls, ...paginatedMap]);
-  }, [initialUrls, paginatedMap]);
+  // const mainUrls = useMemo(() => {
+  //   return new Map([...initialUrls, ...paginatedMap]);
+  // }, [initialUrls, paginatedMap]);
+
   // Check back later !!!!!
   const urls = _isFiltering
     ? new Map(filteredList.map((u, i) => [i, u]))
-    : mainUrls;
+    : paginatedMap;
+    
   console.log("FILTERED LIST IN NEW CONTEXT: ", filteredList);
   /** The total count multiple source of true for the else  part of the tenary is
    * because when changes to the urls(creation and deletion) are made the total count of
@@ -87,16 +97,16 @@ export const UrlsProvider = ({ children }: { children: ReactNode }) => {
    */
   const totalUrlCount = _isFiltering
     ? filterResultCount
-    : initialUrlTotalCount;
+    : paginatedUrlTotalCount;
 
     // Since we are using the etotal of intialUrls, when total changes from the paginated urls, we have to get the current urls from the initial
-useEffect(() => {
-  if(_isFiltering) return
- if(totalUrlCount !== paginatedUrlTotalCount ){
-  loadInitial()
- }
+// useEffect(() => {
+//   if(_isFiltering) return
+//  if(totalUrlCount !== paginatedUrlTotalCount ){
+//   loadInitial()
+//  }
 
-},[_isFiltering, loadInitial, paginatedUrlTotalCount, totalUrlCount])
+// },[_isFiltering, loadInitial, paginatedUrlTotalCount, totalUrlCount])
 
   const contextValue: UrlContextProps = {
     urls,

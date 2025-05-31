@@ -8,16 +8,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * Fetches urls for a requested
  * @param totalCount The total urls count for the current user
  **/
-export const usePaginatedUrls = (totalCount: number) => {
-  const [pageUrls, setPageUrls] = useState<Map<number, UrlData>>(new Map());
+export const usePaginatedUrls = () => {
+  const [pageUrls, setPageUrls] = useState<Map<number, UrlData> | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [totalUrlCount, setTotalUrlCount] = useState<number>(totalCount);
+  const [totalUrlCount, setTotalUrlCount] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<{
     limit: number;
     offset: number;
   } | null>(null);
 
-  const urlCacheRef = useRef<Map<number, UrlData>>(new Map());
+  const urlCacheRef = useRef<Map<number, UrlData> | null>(new Map());
 
   const { user, isAuthenticated } = useAuth();
 
@@ -39,15 +39,15 @@ export const usePaginatedUrls = (totalCount: number) => {
       setCurrentPage({ limit, offset });
 
       // Handles cases where last page might be lest that the limit
-      const pageSize = Math.min(limit, totalCount - offset);
+      const pageSize = Math.min(limit, totalUrlCount - offset);
 
       // skip fetch if we already have data in state
       // page size can be >= 0 depending on offset value
       const alreadyLoaded =
-        offset === 0 ||
+        // offset === 0 ||
         (pageSize > 0 &&
           Array.from({ length: pageSize }).every((_, i) =>
-            urlCacheRef.current.has(offset + i)
+            urlCacheRef.current?.has(offset + i)
           ));
       if (alreadyLoaded) return;
 
@@ -69,14 +69,14 @@ export const usePaginatedUrls = (totalCount: number) => {
           return m;
         });
 
-        if (totalCount !== data.recordCount) {
+        if (totalUrlCount !== data.recordCount) {
           setTotalUrlCount(data.recordCount);
         }
       }
 
       setIsLoading(false);
     },
-    [totalCount, user]
+    [totalUrlCount, user]
   );
 
   const refreshUrls = useCallback(async () => {
@@ -95,6 +95,7 @@ export const usePaginatedUrls = (totalCount: number) => {
       loadPage(limit, offset);
       return cache;
     });
+
 
     // Reload the current page
   }, [user, currentPage, loadPage]);
