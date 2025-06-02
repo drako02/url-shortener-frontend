@@ -5,6 +5,7 @@ import {
   ReactNode,
   useContext,
   useEffect,
+  useMemo,
   // useMemo,
   useState,
 } from "react";
@@ -85,10 +86,12 @@ export const UrlsProvider = ({ children }: { children: ReactNode }) => {
   // }, [initialUrls, paginatedMap]);
 
   // Check back later !!!!!
-  const urls = _isFiltering
-    ? new Map(filteredList.map((u, i) => [i, u]))
-    : paginatedMap;
-    
+  const urls = useMemo(() => {
+    return _isFiltering
+      ? new Map(filteredList.map((u, i) => [i, u]))
+      : paginatedMap;
+  }, [_isFiltering, filteredList, paginatedMap]);
+
   console.log("FILTERED LIST IN NEW CONTEXT: ", filteredList);
   /** The total count multiple source of true for the else  part of the tenary is
    * because when changes to the urls(creation and deletion) are made the total count of
@@ -108,15 +111,18 @@ export const UrlsProvider = ({ children }: { children: ReactNode }) => {
 
 // },[_isFiltering, loadInitial, paginatedUrlTotalCount, totalUrlCount])
 
-  const contextValue: UrlContextProps = {
-    urls,
-    totalUrlCount,
-    initializing,
-    loadPage,
-    applyFilter,
-    currentQueryString: filterQuery || "",
-    refreshUrls,
-  };
+const contextValue = useMemo<UrlContextProps>(
+    () => ({
+      urls,
+      totalUrlCount,
+      initializing,
+      loadPage,
+      applyFilter,
+      currentQueryString: filterQuery || "",
+      refreshUrls,
+    }),
+    [urls, totalUrlCount, initializing, loadPage, applyFilter, filterQuery, refreshUrls]
+  );
 
   return (
     <UrlsContext.Provider value={contextValue}>{children}</UrlsContext.Provider>

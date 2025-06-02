@@ -4,7 +4,7 @@ import { FilterProps, UrlData } from "@/app/types";
 import { useAuth } from "@/context/Auth";
 import { buildFilterQuery, safeFetch } from "@/lib/utils";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 
 export const useUrlFilters = () => {
   const [filterQuery, setFilterQuery] = useState<string>("");
@@ -22,7 +22,14 @@ export const useUrlFilters = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [filterOperators, setFilterOperators] = useState<FilterOperator[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const [, startTransition] = useTransition();
+
   const router = useRouter();
+
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const qsFromParams = searchParams.toString();
 
   const { user } = useAuth();
 
@@ -57,9 +64,14 @@ export const useUrlFilters = () => {
         setFilterOperators(operators);
 
         console.log("BUILT QUERY", currentQuery);
+      } else {
+        currentQuery = param;
+        setFilterQuery(currentQuery);
       }
 
       // setIsLoading(true);
+      console.log({ currentQuery });
+      // router.push(`/${currentQuery}`);
 
       const res = await safeFetch(
         () =>
@@ -78,23 +90,22 @@ export const useUrlFilters = () => {
         setFilterResultCount(res.length);
       }
 
-      router.push(`/${currentQuery}`);
-      setIsLoading(false);
+      startTransition(() => {
+        router.push(`/${currentQuery}`);
+        setIsLoading(false);
+      });
+
+      // router.push(`/${currentQuery}`);
     },
     [router, user]
   );
-
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const qsFromParams = searchParams.toString()
 
   //Remember to update the offset on the urlspage
   useEffect(() => {
     if (!user) return;
     // Might have to check other filter paths
     if (pathname === "/search" && filteredList.length === 0 && !filterQuery) {
-        setIsLoading(true)
-
+      setIsLoading(true);
       safeFetch(
         () =>
           fetchRequest<{ urls: URLResponse[]; length: number }>("/api/urls", {
@@ -109,9 +120,10 @@ export const useUrlFilters = () => {
         if (res) {
           setFilteredList(res.urls);
           setFilterResultCount(res.length);
-          setFilterQuery(`${pathname.slice(1)}?` +qsFromParams)
+          setFilterQuery(`${pathname.slice(1)}?` + qsFromParams);
         }
-        setIsLoading(false)
+        
+        setIsLoading(false);
       });
       console.log("SEARCH PARAMS: ", qsFromParams);
     }
@@ -120,7 +132,7 @@ export const useUrlFilters = () => {
   return {
     filterQuery,
     filteredList,
-    isLoading,
+    isLoading: isLoading,
     applyFilter,
     filterResultCount,
   };

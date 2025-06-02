@@ -25,8 +25,12 @@ export const Actions: React.FC<{
   const { refreshUrls } = useUrls();
   const [copied, setCopied] = useState(false);
   // const [checked, setChecked] = useState(true);
-  const {active, updateActiveState, updating: isUpdating} = useToggleActive(url.id, url.active)
-  console.log({active})
+  const {
+    active,
+    updateActiveState,
+    updating: isUpdating,
+  } = useToggleActive(url.id, url.active);
+  console.log({ active });
 
   const handleCopy = () => {
     copyUrl(url.shortCode);
@@ -106,31 +110,32 @@ export const Actions: React.FC<{
         <Tooltip>
           <TooltipTrigger asChild>
             <Switch
-            disabled={isUpdating}
+              disabled={isUpdating}
               checked={active}
               onCheckedChange={() => {
-                updateActiveState()
+                updateActiveState();
               }}
-              // className={cn(
-              //   "data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200",
-              //   "transition-all duration-200",
-              //   "focus-visible:ring-offset-2 focus-visible:ring-blue-500",
-              //   "active:scale-95",
-              //   itemClassName
-              // )}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                width: "2.25rem", // 36px
-                height: "1.25rem", // 20px
-                borderRadius: "9999px",
-                backgroundColor: active
-                  ? "#2563EB" // bg-blue-600
-                  : "#E5E7EB", // bg-gray-200
-                transition: "background-color 0.2s ease-in-out",
-                cursor: "pointer",
-                opacity: 1,
-              }}
+              className={cn(
+                // "bg-gray-200",
+                "aria-[checked=true]:bg-blue-600 aria-[checked=false]:bg-gray-200",
+                "transition-all duration-200",
+                "focus-visible:ring-offset-2 focus-visible:ring-blue-500",
+                "active:scale-95",
+                itemClassName
+              )}
+              // style={{
+              //   display: "inline-flex",
+              //   alignItems: "center",
+              //   width: "2.25rem", // 36px
+              //   height: "1.25rem", // 20px
+              //   borderRadius: "9999px",
+              //   backgroundColor: active
+              //     ? "#2563EB" // bg-blue-600
+              //     : "#E5E7EB", // bg-gray-200
+              //   transition: "background-color 0.2s ease-in-out",
+              //   cursor: "pointer",
+              //   opacity: 1,
+              // }}
             />
             {/* <Button
               variant="ghost"
@@ -146,7 +151,7 @@ export const Actions: React.FC<{
             </Button> */}
           </TooltipTrigger>
           <TooltipContent side="bottom">
-            <p>Active State</p>
+            <p>{active ? "Deactivate" : "Activate"}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -196,21 +201,21 @@ const useToggleActive = (id: number, initial: boolean) => {
 
   const updateActiveState = useCallback(async () => {
     setUpdating(true);
-    setActive(prev => !prev)
+    setActive((prev) => !prev);
 
-    const previous = active
+    const previous = active;
 
     const res = await updateUrlStatus(id, !previous);
 
     if (!res) {
       setActive(previous);
       setUpdating(false);
-      return
+      return;
     }
 
     // setActive(prev => !prev)
     setUpdating(false);
   }, [active, id]);
 
-  return {active, updating,  updateActiveState}
+  return { active, updating, updateActiveState };
 };
