@@ -28,8 +28,8 @@ export const fetchRequest = async <T>(
   });
 
   try {
-    const token = await auth.currentUser?.getIdToken();
-    console.log({ token, currentUser: auth.currentUser });
+    // const token = await auth.currentUser?.getIdToken();
+    // console.log({ token, currentUser: auth.currentUser });
 
     const abortController = new AbortController();
     const timeOutId = setTimeout(
@@ -40,7 +40,7 @@ export const fetchRequest = async <T>(
     const response = await fetch(url, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        // Authorization: `Bearer ${token}`,
         ...headers,
       },
       method,
@@ -104,6 +104,7 @@ export const mapToUser = (backendUser: UserResponse): User => ({
   uid: backendUser.uid,
   email: backendUser.email,
   joinedAt: new Date(backendUser.joined_at),
+  id: backendUser.id
 });
 
 export interface ErrorLog {

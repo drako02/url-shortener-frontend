@@ -201,13 +201,14 @@ const useToggleActive = (id: number, initial: boolean) => {
 
   const updateActiveState = useCallback(async () => {
     setUpdating(true);
-    setActive((prev) => !prev);
 
     const previous = active;
 
-    const res = await updateUrlStatus(id, !previous);
+    setActive((prev) => !prev);
 
-    if (!res) {
+    const success = await updateUrlStatus(id, !previous);
+
+    if (!success) {
       setActive(previous);
       setUpdating(false);
       return;

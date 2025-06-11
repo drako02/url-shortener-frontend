@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   BarChart,
   Bar,
@@ -42,8 +42,15 @@ import {
 import { useAuth } from "@/context/Auth";
 import { ClicksResponse, URLResponse } from "@/app/api/types";
 import { format } from "date-fns";
-import { mapToURL, URL_SERVICE_API_BASE_URL } from "@/app/api/helpers";
+import {
+  APIResponse,
+  fetchRequest,
+  mapToURL,
+  URL_SERVICE_API_BASE_URL,
+} from "@/app/api/helpers";
 import { useUrls } from "@/context/_Urls";
+import { auth } from "@/firebaseConfig";
+import { getShortUrls } from "@/app/api/urls/urls";
 // import { useUrls } from "@/context/Urls";
 
 // Mock data - replace with actual API calls
@@ -75,7 +82,6 @@ const getChartData = (clicks: ClicksResponse[]) => {
   return formatted;
   // const formatted = clicks.map( click => formatD new Date(click.timestamp))
 };
-
 
 const mockLinks = [
   {
@@ -132,22 +138,30 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { user } = useAuth();
-  const {urls: providerUrls} = useUrls();
+  const { urls: providerUrls } = useUrls();
   const urls = useMemo(
     // () => providerUrls.map((url) => mapToURL(url)).slice(0, 5),
     () =>
       Array.from({ length: 5 })
-        .map((_, i) => providerUrls.get(i))
+        .map((_, i) => providerUrls?.get(i))
         .filter((url): url is URLResponse => url !== undefined)
         .map((url) => mapToURL(url)),
     [providerUrls]
   );
 
+  const { getTopClicked, getTotalURLs } = useDashboardData();
+
+  useEffect(() => {
+    if (user) {
+      getTopClicked();
+      getTotalURLs();
+    }
+  }, [getTopClicked, getTotalURLs, user]);
   useEffect(() => {
     const fetchClicksData = async () => {
       const res = await fetch(`/api/dashboard/clicks?uid=${user?.uid}`);
       if (!res.ok) return;
-      const {data} = (await res.json()) as {
+      const { data } = (await res.json()) as {
         data: { totalClicks: number; clicksDetails: ClicksResponse[] };
       };
       setAnalytics((prevState) => ({
@@ -159,7 +173,6 @@ export default function Dashboard() {
       const chartData = getChartData(data.clicksDetails);
       console.log("CHART DATA: ", chartData);
       setChartData(chartData);
-
     };
     fetchClicksData();
   }, [user?.uid]);
@@ -198,12 +211,11 @@ export default function Dashboard() {
 
   const filteredUrls = urls.filter(
     (url) =>
-      url.shortCode.includes(searchTerm) ||
-      url.originalUrl.includes(searchTerm)
+      url.shortCode.includes(searchTerm) || url.originalUrl.includes(searchTerm)
   );
 
   return (
-    <div className="container py-8 mx-auto">
+    <div className="py-8 mx-3">
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
 
       {/* Quick URL shortener section */}
@@ -408,3 +420,38 @@ export default function Dashboard() {
     </div>
   );
 }
+
+type ShortcodeAndClicks = {
+  shortcode: string;
+  clicks: number;
+};
+const useDashboardData = () => {
+  const [totalUrls, setTotalUrls] = useState<number>();
+  const [totalClicks, setTotalClicks] = useState<number>();
+  const [totalActiveLinks, setActiveLinks] = useState<number>();
+  const [mostCLickedURLs, setMostCLickedURLs] =
+    useState<ShortcodeAndClicks[]>();
+
+  console.log({ totalUrls, totalClicks, totalActiveLinks, mostCLickedURLs });
+  const { user } = useAuth();
+
+  const getTotalURLs = useCallback(async () => {
+    const result = await getShortUrls(user?.uid, 0, 0);
+    setTotalUrls(result.recordCount);
+  }, [user?.uid]);
+
+  const getTopClicked = useCallback(async () => {
+    const res = await fetchRequest<
+      APIResponse<{ shortCode: string; totalClicks: number }[]>
+    >(`/api/dashboard/topclicked?userId=${user?.id}&limit=5`, {});
+
+    console.log({ressss: res})
+    setMostCLickedURLs(
+      res.data?.map((i) => ({ shortcode: i.shortCode, clicks: i.totalClicks }))
+    );
+  }, [user?.id]);
+
+  // getTopClicked()
+
+  return { getTopClicked, getTotalURLs };
+};

@@ -1,4 +1,5 @@
 export type User = {
+  id: number;
   firstName?: string;
   lastName?: string;
   email: string;
@@ -7,6 +8,7 @@ export type User = {
 };
 
 export type UserResponse = {
+  id: number;
   first_name?: string;
   last_name?: string;
   uid: string;

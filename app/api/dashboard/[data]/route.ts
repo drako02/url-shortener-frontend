@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getShortUrls } from "../../urls/urls";
-import { ANALYTICS_SERVICE_BASE_URL, fetchRequest, mapToURL } from "../../helpers";
+import {
+  ANALYTICS_SERVICE_BASE_URL,
+  APIResponse,
+  fetchRequest,
+  mapToURL,
+} from "../../helpers";
 import { ClicksResponse } from "../../types";
 import { logError } from "../../helpers";
 /**
@@ -9,22 +14,50 @@ import { logError } from "../../helpers";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { data: "urls" | "clicks" } }
+  { params }: { params: { data: "urls" | "clicks" | "topclicked" } }
 ) {
   try {
+    const headers = request.headers
     const data = (await params).data;
-    const uid = request.nextUrl.searchParams.get("uid");
+    const userId = request.nextUrl.searchParams.get("userId");
+    if(!userId){
+      return NextResponse.json<APIResponse<null>>({
+        success: false,
+        errors:{"Invalid Request": ["userId was not defined in query params"]}
+      }, {status: 400})
+    }
 
+    const topClickedLimit = request.nextUrl.searchParams.get("limit");
+
+    console.log("dataaaa: ", data)
     switch (data) {
       case "urls":
-        if (!uid) throw new Error("uid was not provided");
-        const userUrlsData = await fetchUserUrls(uid);
-        return NextResponse.json({ data: { ...userUrlsData } }, { status: 200 });
+        const userUrlsData = await fetchUserUrls(userId);
+        return NextResponse.json<APIResponse<unknown>>(
+          {
+            data: { ...userUrlsData },
+            success: true
+          },
+          { status: 200 }
+        );
 
       case "clicks":
-        if (!uid) throw new Error("uid was not provided");
-        const clicksAnalyticsData = await fetchUserClicksAnalytics(uid);
-        return NextResponse.json({ data: { ...clicksAnalyticsData } }, { status: 200 });
+        const clicksAnalyticsData = await fetchUserTotalClicks(userId);
+        return NextResponse.json<APIResponse<unknown>>(
+          {
+            data: { ...clicksAnalyticsData },
+            success: true
+          },
+          { status: 200 }
+        );
+
+      case "topclicked":
+         if(!topClickedLimit) throw new Error("limit are required for topclicked query");
+         console.log("uidddd:", userId)
+        const res = await fetchTopNURLClicks(Number(userId), topClickedLimit)
+        return NextResponse.json({data:res})
+
+
 
       default:
         throw new Error(
@@ -42,20 +75,29 @@ export async function GET(
       logLevel: "error",
     });
 
-    return NextResponse.json({error: "Request failed"}, {status: 500})
+    return NextResponse.json({ error: "Request failed" }, { status: 500 });
   }
 }
 
 const fetchUserUrls = async (uid: string) => {
   const res = await getShortUrls(uid, 0, 0);
-  const formattedUrls = res.urls.map(url => mapToURL(url))
+  const formattedUrls = res.urls.map((url) => mapToURL(url));
   return { totalUrls: res.recordCount, urls: formattedUrls };
 };
 
-const fetchUserClicksAnalytics = async (uid: string) => {
+const fetchUserTotalClicks = async (uid: string) => {
   const res = await fetchRequest<ClicksResponse[]>(
     `${ANALYTICS_SERVICE_BASE_URL}/api/analytics/urls/clicks/${uid}`,
     {}
   );
   return { totalClicks: res.length, clicksDetails: res };
+};
+
+const fetchTopNURLClicks = async (userId: number, limit: number) => {
+  const res = await fetchRequest(
+    `${ANALYTICS_SERVICE_BASE_URL}/api/analytics/users/${userId}/shortcodes/top?limit=${limit}`,
+    {}
+  );
+  console.log("SHORTCODE WITH CLICKS: ", res)
+  return res
 };

@@ -54,5 +54,6 @@ export const getUser = async (uid: string, idToken: string) => {
   const user = await fetchRequest<UserResponse>(`${URL_SERVICE_API_BASE_URL}/users/${uid}`, {
     headers,
   });
+  console.log({ user });
   return user;
 };
