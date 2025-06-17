@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useReducer } from "react";
 import {
   BarChart,
   Bar,
@@ -51,6 +51,7 @@ import {
 import { useUrls } from "@/context/_Urls";
 import { auth } from "@/firebaseConfig";
 import { getShortUrls } from "@/app/api/urls/urls";
+import { toast } from "sonner";
 // import { useUrls } from "@/context/Urls";
 
 // Mock data - replace with actual API calls
@@ -121,12 +122,12 @@ const mockLinks = [
 export default function Dashboard() {
   const [links, setLinks] = useState(mockLinks);
   // const [urls, setUrls] = useState<ShortUrl[]>([]);
-  const [analytics, setAnalytics] = useState<Analytics>({
-    totalLinks: 0,
-    totalClicks: 0,
-    activeLinks: 0,
-    conversionRate: 0,
-  });
+  // const [analytics, setAnalytics] = useState<Analytics>({
+  //   totalLinks: 0,
+  //   totalClicks: 0,
+  //   activeLinks: 0,
+  //   conversionRate: 0,
+  // });
   const [chartData, setChartData] = useState<
     {
       name: string;
@@ -149,33 +150,35 @@ export default function Dashboard() {
     [providerUrls]
   );
 
-  const { getTopClicked, getTotalURLs } = useDashboardData();
+  const { topClicked, totalActiveLinks, totalUrls, totalClicks } = useDashboardData();
 
-  useEffect(() => {
-    if (user) {
-      getTopClicked();
-      getTotalURLs();
-    }
-  }, [getTopClicked, getTotalURLs, user]);
-  useEffect(() => {
-    const fetchClicksData = async () => {
-      const res = await fetch(`/api/dashboard/clicks?uid=${user?.uid}`);
-      if (!res.ok) return;
-      const { data } = (await res.json()) as {
-        data: { totalClicks: number; clicksDetails: ClicksResponse[] };
-      };
-      setAnalytics((prevState) => ({
-        ...prevState,
-        totalClicks: data.totalClicks,
-      }));
-      console.log("Dashboard data: ", data);
+  // useEffect(() => {
+  //   if (user) {
+  //     // getTopClicked();
+  //     // getTotalURLs();
+  //     getTotalActiveUrls();
+  //   }
+  // }, [ getTotalActiveUrls, getTotalURLs, user]);
 
-      const chartData = getChartData(data.clicksDetails);
-      console.log("CHART DATA: ", chartData);
-      setChartData(chartData);
-    };
-    fetchClicksData();
-  }, [user?.uid]);
+  // useEffect(() => {
+  //   const fetchClicksData = async () => {
+  //     const res = await fetch(`/api/dashboard/clicks?uid=${user?.uid}`);
+  //     if (!res.ok) return;
+  //     const { data } = (await res.json()) as {
+  //       data: { totalClicks: number; clicksDetails: ClicksResponse[] };
+  //     };
+  //     setAnalytics((prevState) => ({
+  //       ...prevState,
+  //       totalClicks: data.totalClicks,
+  //     }));
+  //     console.log("Dashboard data: ", data);
+
+  //     const chartData = getChartData(data.clicksDetails);
+  //     console.log("CHART DATA: ", chartData);
+  //     setChartData(chartData);
+  //   };
+  //   fetchClicksData();
+  // }, [user?.uid]);
 
   const handleCreateShortUrl = () => {
     if (!urlInput.trim()) return;
@@ -252,25 +255,25 @@ export default function Dashboard() {
         <Card>
           <CardContent className="p-6">
             <p className="text-sm text-muted-foreground">Total Links</p>
-            <h3 className="text-3xl font-bold">{analytics.totalLinks}</h3>
+            <h3 className="text-3xl font-bold">{totalUrls}</h3>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
             <p className="text-sm text-muted-foreground">Total Clicks</p>
-            <h3 className="text-3xl font-bold">{analytics.totalClicks}</h3>
+            <h3 className="text-3xl font-bold">{totalClicks}</h3>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
             <p className="text-sm text-muted-foreground">Active Links</p>
-            <h3 className="text-3xl font-bold">{analytics.activeLinks}</h3>
+            <h3 className="text-3xl font-bold">{totalActiveLinks}</h3>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
             <p className="text-sm text-muted-foreground">Conversion Rate</p>
-            <h3 className="text-3xl font-bold">{analytics.conversionRate}</h3>
+            <h3 className="text-3xl font-bold">{"N/A"}</h3>
           </CardContent>
         </Card>
       </div>
@@ -425,33 +428,274 @@ type ShortcodeAndClicks = {
   shortcode: string;
   clicks: number;
 };
-const useDashboardData = () => {
-  const [totalUrls, setTotalUrls] = useState<number>();
-  const [totalClicks, setTotalClicks] = useState<number>();
-  const [totalActiveLinks, setActiveLinks] = useState<number>();
-  const [mostCLickedURLs, setMostCLickedURLs] =
-    useState<ShortcodeAndClicks[]>();
 
-  console.log({ totalUrls, totalClicks, totalActiveLinks, mostCLickedURLs });
+const useDashboardData = () => {
+  const [state, dispatch] = useReducer(dashboardReducer, initialDashboardState);
   const { user } = useAuth();
 
   const getTotalURLs = useCallback(async () => {
-    const result = await getShortUrls(user?.uid, 0, 0);
-    setTotalUrls(result.recordCount);
-  }, [user?.uid]);
+    if (!user) return;
+    try {
+      dispatch({ type: "GET_TOTAL_URLS_START" });
+      const result = await getShortUrls(user?.uid, 0, 0);
+      dispatch({ type: "GET_TOTAL_URLS_SUCCESS", payload: result.recordCount });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch URLs total";
+      dispatch({ type: "GET_TOTAL_URLS_ERROR", payload: errorMessage });
+      toast.error(errorMessage);
+      console.error(error);
+    }
+  }, [user]);
 
   const getTopClicked = useCallback(async () => {
-    const res = await fetchRequest<
-      APIResponse<{ shortCode: string; totalClicks: number }[]>
-    >(`/api/dashboard/topclicked?userId=${user?.id}&limit=5`, {});
-
-    console.log({ressss: res})
-    setMostCLickedURLs(
-      res.data?.map((i) => ({ shortcode: i.shortCode, clicks: i.totalClicks }))
-    );
+    try {
+      dispatch({ type: "GET_TOP_CLICKED_START" });
+      const res = await fetchRequest<
+        APIResponse<{ shortCode: string; totalClicks: number }[]>
+      >(`/api/dashboard/topclicked?userId=${user?.id}&limit=5`, {});
+      const payload =
+        res.data?.map((i) => ({
+          shortcode: i.shortCode,
+          clicks: i.totalClicks,
+        })) || [];
+      dispatch({ type: "GET_TOP_CLICKED_SUCCESS", payload });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch top clicked URLs";
+      dispatch({ type: "GET_TOP_CLICKED_ERROR", payload: errorMessage });
+      toast.error(errorMessage);
+      console.error(error);
+    }
   }, [user?.id]);
 
-  // getTopClicked()
+  const getTotalActiveUrls = useCallback(async () => {
+    try {
+      dispatch({ type: "GET_TOTAL_ACTIVE_URLS_START" });
+      const idToken = await auth.currentUser?.getIdToken();
+      const res = (await fetchRequest(
+        `/api/dashboard/active?uid=${user?.uid}`,
+        {
+          headers: { Authorization: `Bearer ${idToken}` },
+        }
+      )) as APIResponse<{ length: number }>;
+      if (!res.success || !res.data) {
+        toast.error("Could not get active URLs");
+        console.error(res.errors);
+        return;
+      }
+      console.log("Active Urls length: ", res.data.length);
+      dispatch({
+        type: "GET_TOTAL_ACTIVE_URLS_SUCCESS",
+        payload: res.data.length,
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch total active URLs";
+      dispatch({ type: "GET_TOTAL_ACTIVE_URLS_ERROR", payload: errorMessage });
+      toast.error(errorMessage);
+      console.error(error);
+    }
+  }, [user?.uid]);
 
-  return { getTopClicked, getTotalURLs };
+  const getTotalClicks = useCallback(async () => {
+    try {
+      dispatch({ type: "GET_TOTAL_CLICKS_START" });
+      const res = await fetchRequest<APIResponse<{ totalClicks: number }>>(
+        `/api/dashboard/clicks?userId=${user?.id}`,
+        {}
+      );
+      if (res.success && res.data) {
+        dispatch({ type: "GET_TOTAL_CLICKS_SUCCESS", payload: res.data.totalClicks });
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch total clicks";
+      dispatch({ type: "GET_TOTAL_CLICKS_ERROR", payload: errorMessage });
+      toast.error(errorMessage);
+      console.error(error);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    const getAnalytics = async () => {
+      await Promise.all([
+        getTotalURLs(),
+        getTotalActiveUrls(),
+        getTopClicked(),
+        getTotalClicks()
+      ]);
+    };
+    getAnalytics();
+  }, [getTopClicked, getTotalActiveUrls, getTotalClicks, getTotalURLs]);
+
+  return {
+    getTopClicked,
+    getTotalURLs,
+    getTotalActiveUrls,
+    totalActiveLinks: state.totalActiveUrls.data,
+    totalClicks: state.totalClicks.data,
+    totalUrls: state.totalUrls.data,
+    topClicked: state.topClicked.data,
+    loading: {
+      totalUrls: state.totalUrls.loading,
+      totalActiveUrls: state.totalActiveUrls.loading,
+      topClicked: state.topClicked.loading,
+      totalClicks: state.totalClicks.loading 
+    },
+    errors: {
+      totalUrls: state.totalUrls.error,
+      totalActiveUrls: state.totalActiveUrls.error,
+      topClicked: state.topClicked.error,
+      totalClicks: state.totalClicks.error 
+    },
+  };
+};
+
+// const actions = {
+//   GET_TOTAL_URLS: "GET_TOTAL_URLS",
+//   GET_TOTAL_ACTIVE_URLS: "GET_TOTAL_ACTIVE_URLS",
+//   GET_TOP_CLICKED: "GET_TOP_CLICKED",
+// } as const;
+
+type DashboardAction =
+  | { type: "GET_TOTAL_URLS_START" }
+  | { type: "GET_TOTAL_URLS_SUCCESS"; payload: number }
+  | { type: "GET_TOTAL_URLS_ERROR"; payload: string }
+  | { type: "GET_TOTAL_ACTIVE_URLS_START" }
+  | { type: "GET_TOTAL_ACTIVE_URLS_SUCCESS"; payload: number }
+  | { type: "GET_TOTAL_ACTIVE_URLS_ERROR"; payload: string }
+  | { type: "GET_TOP_CLICKED_START" }
+  | { type: "GET_TOP_CLICKED_SUCCESS"; payload: ShortcodeAndClicks[] }
+  | { type: "GET_TOP_CLICKED_ERROR"; payload: string }
+  | { type: "GET_TOTAL_CLICKS_START" }
+  | { type: "GET_TOTAL_CLICKS_SUCCESS"; payload: number }
+  | { type: "GET_TOTAL_CLICKS_ERROR"; payload: string };
+
+type DashboardState = {
+  totalUrls: {
+    data: number | null;
+    loading: boolean;
+    error: string | null;
+  };
+  totalActiveUrls: {
+    data: number | null;
+    loading: boolean;
+    error: string | null;
+  };
+  topClicked: {
+    data: ShortcodeAndClicks[] | null;
+    loading: boolean;
+    error: string | null;
+  };
+  totalClicks: {
+    data: number | null;
+    loading: boolean;
+    error: string | null;
+  };
+};
+
+const initialDashboardState: DashboardState = {
+  totalUrls: { data: null, loading: false, error: null },
+  totalActiveUrls: { data: null, loading: false, error: null },
+  topClicked: { data: null, loading: false, error: null },
+  totalClicks: { data: null, loading: false, error: null },
+};
+
+const dashboardReducer = (
+  state: DashboardState,
+  action: DashboardAction
+): DashboardState => {
+  switch (action.type) {
+    case "GET_TOTAL_URLS_START":
+      return {
+        ...state,
+        totalUrls: { ...state.totalUrls, loading: true, error: null },
+      };
+    case "GET_TOTAL_URLS_SUCCESS":
+      return {
+        ...state,
+        totalUrls: { data: action.payload, loading: false, error: null },
+      };
+    case "GET_TOTAL_URLS_ERROR":
+      return {
+        ...state,
+        totalUrls: {
+          ...state.totalUrls,
+          loading: false,
+          error: action.payload,
+        },
+      };
+    case "GET_TOTAL_ACTIVE_URLS_START":
+      return {
+        ...state,
+        totalActiveUrls: {
+          ...state.totalActiveUrls,
+          loading: true,
+          error: null,
+        },
+      };
+    case "GET_TOTAL_ACTIVE_URLS_SUCCESS":
+      return {
+        ...state,
+        totalActiveUrls: { data: action.payload, loading: false, error: null },
+      };
+    case "GET_TOTAL_ACTIVE_URLS_ERROR":
+      return {
+        ...state,
+        totalActiveUrls: {
+          ...state.totalActiveUrls,
+          loading: false,
+          error: action.payload,
+        },
+      };
+    case "GET_TOP_CLICKED_START":
+      return {
+        ...state,
+        topClicked: { ...state.topClicked, loading: true, error: null },
+      };
+    case "GET_TOP_CLICKED_SUCCESS":
+      return {
+        ...state,
+        topClicked: { data: action.payload, loading: false, error: null },
+      };
+    case "GET_TOP_CLICKED_ERROR":
+      return {
+        ...state,
+        topClicked: {
+          ...state.topClicked,
+          loading: false,
+          error: action.payload,
+        },
+      };
+    case "GET_TOTAL_CLICKS_START":
+      return {
+        ...state,
+        totalClicks: {
+          ...state.totalClicks,
+          loading: true,
+          error: null,
+        },
+      };
+    case "GET_TOTAL_CLICKS_SUCCESS":
+      return {
+        ...state,
+        totalClicks: { data: action.payload, loading: false, error: null },
+      };
+    case "GET_TOTAL_CLICKS_ERROR":
+      return {
+        ...state,
+        totalClicks: {
+          ...state.totalClicks,
+          loading: false,
+          error: action.payload,
+        },
+      };
+    default:
+      return state;
+  }
 };

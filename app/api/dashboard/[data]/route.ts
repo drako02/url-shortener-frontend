@@ -5,38 +5,46 @@ import {
   APIResponse,
   fetchRequest,
   mapToURL,
+  URL_SERVICE_API_BASE_URL,
 } from "../../helpers";
 import { ClicksResponse } from "../../types";
 import { logError } from "../../helpers";
+import { buildFilterQuery } from "@/lib/utils";
+import { FilterProps } from "@/app/types";
 /**
  *
  * param urls, clicks
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { data: "urls" | "clicks" | "topclicked" } }
+  { params }: { params: { data: "urls" | "clicks" | "topclicked" | "active" } }
 ) {
   try {
-    const headers = request.headers
+    const authHeader = request.headers.get("authorization");
     const data = (await params).data;
     const userId = request.nextUrl.searchParams.get("userId");
-    if(!userId){
-      return NextResponse.json<APIResponse<null>>({
-        success: false,
-        errors:{"Invalid Request": ["userId was not defined in query params"]}
-      }, {status: 400})
+    if (!userId && data !== "active") {
+      return NextResponse.json<APIResponse<null>>(
+        {
+          success: false,
+          errors: {
+            "Invalid Request": ["userId was not defined in query params"],
+          },
+        },
+        { status: 400 }
+      );
     }
 
     const topClickedLimit = request.nextUrl.searchParams.get("limit");
 
-    console.log("dataaaa: ", data)
+    console.log("dataaaa: ", data);
     switch (data) {
       case "urls":
         const userUrlsData = await fetchUserUrls(userId);
         return NextResponse.json<APIResponse<unknown>>(
           {
             data: { ...userUrlsData },
-            success: true
+            success: true,
           },
           { status: 200 }
         );
@@ -46,18 +54,56 @@ export async function GET(
         return NextResponse.json<APIResponse<unknown>>(
           {
             data: { ...clicksAnalyticsData },
-            success: true
+            success: true,
           },
           { status: 200 }
         );
 
       case "topclicked":
-         if(!topClickedLimit) throw new Error("limit are required for topclicked query");
-         console.log("uidddd:", userId)
-        const res = await fetchTopNURLClicks(Number(userId), topClickedLimit)
-        return NextResponse.json({data:res})
+        if (!topClickedLimit)
+          throw new Error("limit are required for topclicked query");
+        console.log("uidddd:", userId);
+        const res = await fetchTopNURLClicks(Number(userId), topClickedLimit);
+        return NextResponse.json({ data: res });
 
+      case "active":
+        if (!authHeader) {
+          return NextResponse.json<APIResponse<null>>(
+            { success: false, errors: { auth: ["Missing Authorization header"] } },
+            { status: 401 }
+          );
+        }
 
+        const queryProps: FilterProps = {
+          filters: [{ field: "active", operator: "eq", value: true }],
+        };
+        const uid = request.nextUrl.searchParams.get("uid");
+        if (!uid)
+          return NextResponse.json<APIResponse<null>>(
+            {
+              success: false,
+              errors: { "Invalid Request": ["uid was not provided"] },
+            },
+            { status: 400 }
+          );
+
+        // const URLQuery = buildFilterQuery(queryProps);
+        const { length: activeURLsLength } = await fetchRequest<{
+          urls: unknown;
+          length: number;
+        }>(`${URL_SERVICE_API_BASE_URL}/urls`, {
+          headers:{Authorization: authHeader,},
+          method: "POST",
+          body: {
+            ...queryProps,
+            uid,
+          },
+        });
+
+        return NextResponse.json<APIResponse<{ length: number }>>({
+          data: { length: activeURLsLength },
+          success: true,
+        });
 
       default:
         throw new Error(
@@ -98,6 +144,6 @@ const fetchTopNURLClicks = async (userId: number, limit: number) => {
     `${ANALYTICS_SERVICE_BASE_URL}/api/analytics/users/${userId}/shortcodes/top?limit=${limit}`,
     {}
   );
-  console.log("SHORTCODE WITH CLICKS: ", res)
-  return res
+  console.log("SHORTCODE WITH CLICKS: ", res);
+  return res;
 };
