@@ -17,7 +17,7 @@ import { FilterProps } from "@/app/types";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { data: "urls" | "clicks" | "topclicked" | "active" } }
+  { params }: { params: { data: "urls" | "clicks" | "topclicked" | "active" | "getClicks" } }
 ) {
   try {
     const authHeader = request.headers.get("authorization");
@@ -69,7 +69,10 @@ export async function GET(
       case "active":
         if (!authHeader) {
           return NextResponse.json<APIResponse<null>>(
-            { success: false, errors: { auth: ["Missing Authorization header"] } },
+            {
+              success: false,
+              errors: { auth: ["Missing Authorization header"] },
+            },
             { status: 401 }
           );
         }
@@ -92,7 +95,7 @@ export async function GET(
           urls: unknown;
           length: number;
         }>(`${URL_SERVICE_API_BASE_URL}/urls`, {
-          headers:{Authorization: authHeader,},
+          headers: { Authorization: authHeader },
           method: "POST",
           body: {
             ...queryProps,
@@ -105,6 +108,24 @@ export async function GET(
           success: true,
         });
 
+      case "getClicks": {
+        const { start, end } = Object.fromEntries(
+          request.nextUrl.searchParams.entries()
+        );
+        console.log({start, end})
+
+        const res = await fetchRequest<ClicksResponse[]>(
+          `${ANALYTICS_SERVICE_BASE_URL}/api/analytics/urls/clicks/${userId}?startDate=${start}&endDate=${end}`,
+          {}
+        );
+        return NextResponse.json<APIResponse<ClicksResponse[]>>(
+          {
+            success: true,
+            data: res,
+          },
+          { status: 200 }
+        );
+      }
       default:
         throw new Error(
           `Path parameter not supported. Expected ${typeof params.data}`
