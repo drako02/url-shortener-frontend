@@ -142,7 +142,7 @@ const getUrlClickCount = async (
 ) => {
   try {
     const res = await fetchRequest<{ data: number }>(
-      `/api/visits?shortcode = ${shortcode}`,
+      `/api/visits?shortcode=${shortcode}`,
       {}
     );
     return res.data;
