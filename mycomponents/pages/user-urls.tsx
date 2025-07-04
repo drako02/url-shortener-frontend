@@ -1,5 +1,5 @@
 "use client";
-import { mapToURL, URL_SERVICE_API_BASE_URL } from "@/app/api/helpers";
+import { fetchRequest, logError, mapToURL, URL_SERVICE_API_BASE_URL } from "@/app/api/helpers";
 import { ShortUrl, URLResponse } from "@/app/api/types";
 import { useUrls } from "@/context/_Urls";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import {
   RowContentProps,
 } from "@/mycomponents/table/types";
 import { format, formatDistance } from "date-fns";
-import { Link as LinkIcon, RefreshCw, Info } from "lucide-react";
+import { Link as LinkIcon, RefreshCw, Info, PointerIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -67,6 +67,7 @@ export default function UserUrls() {
       { label: "Short Url" },
       { label: "Original" },
       { label: "Created" },
+      { label: "Clicks" },
       { label: "Actions" },
     ],
     []
@@ -162,6 +163,7 @@ export default function UserUrls() {
             ),
             tooltipContent: format(dateCreated, "PPpp")
           },
+          {element: <p className="flex flex-1">{url.clicks}</p>},
           { 
             element: (
               <div className="flex justify-end w-full">

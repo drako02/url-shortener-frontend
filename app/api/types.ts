@@ -30,7 +30,8 @@ export interface URLResponse {
   created_at: string;
   updated_at: string;
   user_id: number;
-  active: boolean
+  active: boolean;
+  clicks: number;
 }
 
 export interface ShortUrl {
@@ -40,7 +41,8 @@ export interface ShortUrl {
   createdAt: Date;
   updatedAt: Date;
   userId: number;
-  active: boolean
+  active: boolean;
+  clicks: number;
 }
 
 export type FilterOperator =

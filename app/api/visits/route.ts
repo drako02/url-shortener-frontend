@@ -3,9 +3,9 @@ import { ANALYTICS_SERVICE_BASE_URL } from "../helpers";
 
 export async function GET(request: NextRequest) {
   try {
-    const shortCode = request.nextUrl.searchParams.get("shortCode");
+    const shortcode = request.nextUrl.searchParams.get("shortcode");
     const res = await fetch(
-      `${ANALYTICS_SERVICE_BASE_URL}/api/analytics/urls/${shortCode}/clicks`
+      `${ANALYTICS_SERVICE_BASE_URL}/api/analytics/urls/${shortcode}/clicks`
     );
 
     if (!res.ok) {

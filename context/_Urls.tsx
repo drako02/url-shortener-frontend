@@ -14,6 +14,7 @@ import { usePaginatedUrls } from "@/hooks/use-paginated-urls";
 import { useUrlFilters } from "@/hooks/use-urls-filters";
 import { usePathname } from "next/navigation";
 
+//TODO Replace the URLData type with URLResponse to make it consistennt and prevent future errors
 const DEFAULT_PAGE_SIZE = 10;
 export type UrlContextProps = {
   urls: Map<number, UrlData> | null;

@@ -1,3 +1,4 @@
+import { fetchRequest, logError } from "@/app/api/helpers";
 import { getShortUrls } from "@/app/api/urls/urls";
 import { UrlData } from "@/app/types";
 import { useAuth } from "@/context/Auth";
@@ -54,7 +55,7 @@ export const usePaginatedUrls = () => {
       setIsLoading(true);
 
       const data = await safeFetch(
-        () => getShortUrls(user.uid, limit, offset),
+        () => getShortUrlsWithClicks(user.uid, limit, offset),
         "Fetch paginated urls"
       );
 
@@ -134,3 +135,56 @@ export const usePaginatedUrls = () => {
 //     return { success: false, data: null, error };
 //   }
 // };
+
+const getUrlClickCount = async (
+  shortcode: string,
+  handleError?: (error: unknown) => unknown
+) => {
+  try {
+    const res = await fetchRequest<{ data: number }>(
+      `/api/visits?shortcode = ${shortcode}`,
+      {}
+    );
+    return res.data;
+  } catch (error) {
+    logError({
+      context: "Fetching URL click count",
+      error,
+      message: "Failed to get click count for URL",
+      logLevel: "error",
+    })
+    if (handleError) {
+      handleError(error);
+    } 
+  }
+};
+
+const getShortUrlsWithClicks = async (
+  uid: string,
+  limit?: number,
+  offset?: number
+) => {
+  const urls = await getShortUrls(uid, limit, offset);
+  const withClicks = await Promise.all(urls.urls.map(async (u) => {
+      const clickCount = await getUrlClickCount(u.short_code);
+      return { ...u, clicks: clickCount };
+    }))
+
+  // const urlsWithClicks = {
+  //   recordCount: urls.recordCount,
+  //   urls: await Promise.all(urls.urls.map(async (u) => {
+  //     const clickCount = await getUrlClickCount(u.short_code);
+  //     return { ...u, clicks: clickCount };
+  //   })),
+  // };
+
+  const urlsWithClicks = {
+    recordCount: urls.recordCount,
+    urls: withClicks,
+  };
+
+
+  return urlsWithClicks
+  //TODO continie with create a utility function for the getShortUrl function that inserts the
+  //visits/clicks
+};

@@ -9,7 +9,7 @@ export type UrlData = {
   created_at: string;
   updated_at: string;
   user_id: number;
-  visits?: number;
+  clicks?: number;
 };
 
 export type UrlContextProps = {

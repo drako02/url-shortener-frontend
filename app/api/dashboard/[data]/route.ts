@@ -17,7 +17,7 @@ import { FilterProps } from "@/app/types";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { data: "urls" | "clicks" | "topclicked" | "active" | "getClicks" } }
+  { params }: { params: { data: "urls" | "clicks" | "topclicked" | "active" | "getClicks" | "urlClicks" } }
 ) {
   try {
     const authHeader = request.headers.get("authorization");
@@ -126,6 +126,15 @@ export async function GET(
           { status: 200 }
         );
       }
+
+      // case "urlClicks": {
+      //   const shortcode = request.nextUrl.searchParams.get("shortcode")
+      //   if (!shortcode){
+      //     throw "" // Handle properly
+      //   }
+
+      //   const res = await fetchRequest()
+      // }
       default:
         throw new Error(
           `Path parameter not supported. Expected ${typeof params.data}`

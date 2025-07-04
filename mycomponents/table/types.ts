@@ -3,7 +3,7 @@ import { CustomPaginationProps } from "../pagination";
 
 interface HeaderCellProps{
     element?: ReactNode;
-    label: string;
+    label?: string;
     onClick?: () => unknown;
 }
 export interface BodyCellProps {

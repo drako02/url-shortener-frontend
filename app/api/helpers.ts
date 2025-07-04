@@ -143,7 +143,8 @@ export const mapToURL = (backendURL: URLResponse): ShortUrl => ({
   createdAt: new Date(backendURL.created_at),
   updatedAt: new Date(backendURL.updated_at),
   userId: backendURL.user_id,
-  active: backendURL.active
+  active: backendURL.active,
+  clicks: backendURL.clicks,
 });
 
 export class APIError extends Error {
