@@ -13,7 +13,7 @@ import {
   PlusCircle,
   Settings,
   User,
-  ArrowLeftSquare,
+  LogOut,
 } from "lucide-react";
 import { MainHeader } from "@/mycomponents/headers/header";
 
@@ -84,22 +84,14 @@ export default function HomeLayout({
           icon: <PlusCircle size={18} />,
           url: "/create",
         },
-      ],
-    },
-    {
-      title: "Account",
-      options: [
-        {
-          name: "Profile",
-          icon: <User size={18} />,
-        },
         {
           name: "Settings",
           icon: <Settings size={18} />,
+          url: "/settings",
         },
         {
           name: "Sign out",
-          icon: <ArrowLeftSquare size={18} />,
+          icon: <LogOut size={18} />,
           onOptionClick: () => {
             signOut();
             router.push("/sign-in");
@@ -107,6 +99,27 @@ export default function HomeLayout({
         },
       ],
     },
+    // {
+    //   title: "Account",
+    //   options: [
+    //     {
+    //       name: "Profile",
+    //       icon: <User size={18} />,
+    //     },
+    //     // {
+    //     //   name: "Settings",
+    //     //   icon: <Settings size={18} />,
+    //     // },
+    //     // {
+    //     //   name: "Sign out",
+    //     //   icon: <ArrowLeftSquare size={18} />,
+    //     //   onOptionClick: () => {
+    //     //     signOut();
+    //     //     router.push("/sign-in");
+    //     //   },
+    //     // },
+    //   ],
+    // },
   ];
 
   const headerOptions = sideBarOptions.flatMap((option) =>
