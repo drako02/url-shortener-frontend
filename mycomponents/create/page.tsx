@@ -298,6 +298,7 @@ export const CreateUrlPage = () => {
                       <CardContent className="pt-4 flex justify-center">
                         <div className="p-4 bg-white rounded-lg">
                           <QRCode
+                            title="QR Code for shortened URL"
                             value={`${URL_SERVICE_API_BASE_URL}/${shortCode}`}
                             size={180}
                           />

@@ -185,6 +185,7 @@ const getShortUrlsWithClicks = async (
 
 
   return urlsWithClicks
-  //TODO continie with create a utility function for the getShortUrl function that inserts the
-  //visits/clicks
 };
+
+// TODO When a url is active state is changed using the toggle, when the urls page is navigated away from, 
+// and navigated to again the toggle is not consistent with the actual active state, only after you reload the page . Fix thatyo

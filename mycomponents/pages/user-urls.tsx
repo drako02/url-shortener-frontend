@@ -20,6 +20,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { URLCard } from "../card/card";
 import { CustomPagination } from "../pagination";
 import { motion, AnimatePresence } from "framer-motion";
+import { tableHeaders } from "@/lib/constants";
+import { URLCOMPONENTS } from "./common/url_table";
 
 export default function UserUrls() {
   const { urls, totalUrlCount, initializing, loadPage, applyFilter, refreshUrls } = useUrls();
@@ -60,19 +62,6 @@ export default function UserUrls() {
     }
   }, [loadPage, offset, pathName]);
 
-  // Table headers definition
-  const tableHeaders: HeaderContentProps = useMemo(
-    () => [
-      { label: "ID" },
-      { label: "Short Url" },
-      { label: "Original" },
-      { label: "Created" },
-      { label: "Clicks" },
-      { label: "Actions" },
-    ],
-    []
-  );
-
   // Handle refresh button click
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -98,78 +87,30 @@ export default function UserUrls() {
       .filter((url): url is URLResponse => url !== undefined)
       .map((url) => mapToURL(url))
       .map((url): BodyCellProps[] => {
-        const FOUR_DAYS_MS = 4 * 24 * 60 * 60 * 1000;
         const dateCreated = new Date(url.createdAt);
-        const ageInMs = Date.now() - dateCreated.getTime();
-        const isRecent = ageInMs < FOUR_DAYS_MS;
-
-        const dateDisplay =
-          ageInMs < FOUR_DAYS_MS
-            ? formatDistance(dateCreated, new Date(), { addSuffix: true })
-            : format(dateCreated, "PPp");
-
-        const displayOriginalUrl = url.originalUrl.length > 45 
-          ? url.originalUrl.substring(0, 45) + "..." 
-          : url.originalUrl;
-        
-        const shortCodeDisplay = url.shortCode;
-        
         return [
-          { 
-            element: (
-              <span className="px-2 py-0.5 bg-slate-100 rounded-md text-xs font-medium text-slate-700">
-                #{url.id.toString()}
-              </span>
-            ),
+          {
+            element: URLCOMPONENTS.Id({ id: url.id }),
           },
           {
-            element: (
-              <Link
-                href={`${URL_SERVICE_API_BASE_URL}/${url.shortCode}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-1.5 font-medium text-blue-600 hover:text-blue-800 transition-colors"
-              >
-                <div className="flex items-center justify-center p-1 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
-                  <LinkIcon size="12" className="text-blue-500 group-hover:text-blue-700" />
-                </div>
-                <span className="underline underline-offset-2 decoration-blue-200 group-hover:decoration-blue-400">
-                  {shortCodeDisplay}
-                </span>
-              </Link>
-            ),
+            element: URLCOMPONENTS.ShortUrl({
+              base: `${URL_SERVICE_API_BASE_URL}`,
+              code: url.shortCode,
+            }),
             tooltipContent: `${URL_SERVICE_API_BASE_URL}/${url.shortCode}`,
-            subLabel: "Click to open shortened URL"
+            subLabel: "Click to open shortened URL",
           },
-          { 
+          {
             tooltipContent: url.originalUrl,
-            element: (
-              <div className="flex flex-col">
-                <span className="truncate max-w-[250px]">{displayOriginalUrl}</span>
-                <span className="text-xs text-slate-400 truncate max-w-[250px]">
-                  {new URL(url.originalUrl).hostname}
-                </span>
-              </div>
-            )
+            element: URLCOMPONENTS.OriginalUrl({ url: url.originalUrl }),
           },
-          { 
-            element: (
-              <div className="flex items-center gap-1.5">
-                <div className={`w-2 h-2 rounded-full ${isRecent ? 'bg-green-400' : 'bg-slate-300'}`}></div>
-                <span className={`${isRecent ? 'text-slate-800' : 'text-slate-600'}`}>
-                  {dateDisplay}
-                </span>
-              </div>
-            ),
-            tooltipContent: format(dateCreated, "PPpp")
+          {
+            element: URLCOMPONENTS.CreatedAt({ createdAt: url.createdAt }),
+            tooltipContent: format(dateCreated, "PPpp"),
           },
-          {element: <p className="flex flex-1">{url.clicks}</p>},
-          { 
-            element: (
-              <div className="flex justify-end w-full">
-                <Actions url={url} className="justify-end" />
-              </div>
-            ) 
+          { element: URLCOMPONENTS.Clicks({ clicks: url.clicks }) },
+          {
+            element: URLCOMPONENTS.Actions({ url }),
           },
         ];
       });

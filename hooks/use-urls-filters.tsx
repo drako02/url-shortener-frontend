@@ -2,6 +2,7 @@ import { fetchRequest, parseSearchParams } from "@/app/api/helpers";
 import { FilterOperator, URLResponse } from "@/app/api/types";
 import { FilterProps, UrlData } from "@/app/types";
 import { useAuth } from "@/context/Auth";
+import { auth } from "@/firebaseConfig";
 import { buildFilterQuery, safeFetch } from "@/lib/utils";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
@@ -74,14 +75,17 @@ export const useUrlFilters = () => {
       // router.push(`/${currentQuery}`);
 
       const res = await safeFetch(
-        () =>
-          fetchRequest<{ urls: URLResponse[]; length: number }>("/api/urls", {
+        async () => {
+          const token = await auth.currentUser?.getIdToken()
+          return fetchRequest<{ urls: URLResponse[]; length: number }>("/api/urls", {
             method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
             body:
               typeof param === "string"
                 ? { ...parseSearchParams(param), uid: user.uid }
                 : { ...param, uid: user.uid },
-          }),
+          })
+        },
         "Filter URLs"
       );
 
@@ -107,14 +111,17 @@ export const useUrlFilters = () => {
     if (pathname === "/search" && filteredList.length === 0 && !filterQuery) {
       setIsLoading(true);
       safeFetch(
-        () =>
-          fetchRequest<{ urls: URLResponse[]; length: number }>("/api/urls", {
+        async () => {
+          const token = await auth.currentUser?.getIdToken()
+          return fetchRequest<{ urls: URLResponse[]; length: number }>("/api/urls", {
             method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
             body: {
               ...parseSearchParams(qsFromParams),
               uid: user.uid,
             },
-          }),
+          })
+        },
         "Filter URLs"
       ).then((res) => {
         if (res) {
