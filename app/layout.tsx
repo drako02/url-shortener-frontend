@@ -54,8 +54,8 @@ export default async function RootLayout({
         <AuthProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            defaultTheme="light"
+            // enableSystem
             disableTransitionOnChange
           >
             <Suspense>
