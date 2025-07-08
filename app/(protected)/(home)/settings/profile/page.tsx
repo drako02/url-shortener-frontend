@@ -8,19 +8,28 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Camera, Check, X, Edit3, Mail, User, Calendar } from "lucide-react";
+import { Camera, Check, X, Edit3, Mail, Calendar } from "lucide-react";
 import { SettingSection } from "../shared/setting-section";
 import { useAuth } from "@/context/Auth";
+import { User } from "@/app/api/types";
 
 //TODO Add users should be able to add an avatar
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
+  const [newData, setNewData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
   });
 
   const {user} = useAuth();
+  if (!user){
+    return null
+  }
+  // useEffect(() => {
+  //   setFormData({na})
+  // })
+  console.log({lastName: user.lastName})
   
   const handleSave = () => {
     // Handle save logic here
@@ -32,6 +41,23 @@ export default function Profile() {
     // Reset form data to original values
   };
 
+  const avatarLetters = (user: User): string => {
+    const { firstName, lastName, email } = user;
+    if (firstName && lastName) {
+      return firstName[0] + lastName[0];
+    }
+
+    if (firstName && !lastName) {
+      return firstName.slice(0, 2);
+    }
+
+    if (!firstName && lastName) {
+      return lastName.slice(0, 2);
+    }
+
+    return email.slice(0, 2);
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Profile Header */}
@@ -40,9 +66,10 @@ export default function Profile() {
           <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
             <div className="relative group">
               <Avatar className="h-24 w-24 ring-4 ring-white dark:ring-gray-700 shadow-lg">
-                <AvatarImage src="/placeholder-avatar.jpg" alt="Profile" /> 
+                <AvatarImage src="/placeholder-avatar.jpg" alt="Profile" />
                 <AvatarFallback className="text-xl font-semibold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                  {formData.name.split(' ').map(n => n[0]).join('')}
+                  {/* {newData.name.split(' ').map(n => n[0]).join('')} */}
+                  {avatarLetters(user)}
                 </AvatarFallback>
               </Avatar>
               <Button
@@ -53,11 +80,11 @@ export default function Profile() {
                 <Camera className="h-4 w-4" />
               </Button>
             </div>
-            
+
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {formData.name}
+                  {newData.name}
                 </h1>
                 <Badge variant="secondary" className="px-2 py-1">
                   Pro User
@@ -69,7 +96,7 @@ export default function Profile() {
               <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                 <div className="flex items-center gap-1">
                   <Mail className="h-4 w-4" />
-                  {formData.email}
+                  {newData.email}
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
@@ -108,20 +135,39 @@ export default function Profile() {
         }
         content={
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">
-                  Full Name
-                </Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  disabled={!isEditing}
-                  className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+            <div className="grid grid-cols-1 gap-6">
+              <div className="flex gap-2 "> {/* use grid */}
+                <div className="flex flex-col gap-1">
+                  <Label htmlFor="firstName" className="text-sm font-medium text-nowrap">
+                    First Name
+                  </Label>
+                  <Input
+                    id="firstName"
+                    value={newData.name}
+                    onChange={(e) =>
+                      setNewData({ ...newData, name: e.target.value })
+                    }
+                    disabled={!isEditing}
+                    className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div className="flex  flex-col gap-1">
+                  <Label htmlFor="lastName" className="text-sm font-medium text-nowrap">
+                    Last Name
+                  </Label>
+                  <Input
+                    id="lastName"
+                    value={newData.name}
+                    onChange={(e) =>
+                      setNewData({ ...newData, name: e.target.value })
+                    }
+                    disabled={!isEditing}
+                    className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
                   Email Address
@@ -129,14 +175,15 @@ export default function Profile() {
                 <Input
                   id="email"
                   type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  value={newData.email}
+                  onChange={(e) =>
+                    setNewData({ ...newData, email: e.target.value })
+                  }
                   disabled={!isEditing}
                   className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
-
 
             {isEditing && (
               <div className="flex gap-3 pt-2">
