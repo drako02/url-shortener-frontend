@@ -134,11 +134,17 @@ export default function Profile() {
           </div>
         }
         content={
+          // TODO Handle media queries for the inputs
           <div className="space-y-6">
-            <div className="grid grid-cols-1 gap-6">
-              <div className="flex gap-2 "> {/* use grid */}
+            <div className="grid grid-rows-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
+                {" "}
+                {/* use grid */}
                 <div className="flex flex-col gap-1">
-                  <Label htmlFor="firstName" className="text-sm font-medium text-nowrap">
+                  <Label
+                    htmlFor="firstName"
+                    className="text-sm font-medium text-nowrap"
+                  >
                     First Name
                   </Label>
                   <Input
@@ -151,9 +157,11 @@ export default function Profile() {
                     className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-
                 <div className="flex  flex-col gap-1">
-                  <Label htmlFor="lastName" className="text-sm font-medium text-nowrap">
+                  <Label
+                    htmlFor="lastName"
+                    className="text-sm font-medium text-nowrap"
+                  >
                     Last Name
                   </Label>
                   <Input
@@ -168,20 +176,22 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
-                  Email Address
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={newData.email}
-                  onChange={(e) =>
-                    setNewData({ ...newData, email: e.target.value })
-                  }
-                  disabled={!isEditing}
-                  className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+              <div className="space-y-2 grid grid-cols-3 ">
+                <div className="col-span-2">
+                  <Label htmlFor="email" className="text-sm font-medium">
+                    Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={newData.email}
+                    onChange={(e) =>
+                      setNewData({ ...newData, email: e.target.value })
+                    }
+                    disabled={!isEditing}
+                    className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
               </div>
             </div>
 
