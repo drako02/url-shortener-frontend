@@ -23,6 +23,17 @@ export default function Profile() {
   });
 
   const {user} = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      setNewData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+      });
+    }
+  }, [user]);
+
   if (!user){
     return null
   }
@@ -84,7 +95,8 @@ export default function Profile() {
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {newData.name}
+                  {/* {newData.firstName + " " + newData.lastName} */}
+                  {user.firstName + " " + user.lastName}
                 </h1>
                 <Badge variant="secondary" className="px-2 py-1">
                   Pro User
@@ -134,10 +146,9 @@ export default function Profile() {
           </div>
         }
         content={
-          // TODO Handle media queries for the inputs
           <div className="space-y-6">
             <div className="grid grid-rows-2 gap-3">
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {" "}
                 {/* use grid */}
                 <div className="flex flex-col gap-1">
@@ -149,9 +160,9 @@ export default function Profile() {
                   </Label>
                   <Input
                     id="firstName"
-                    value={newData.name}
+                    value={newData.firstName}
                     onChange={(e) =>
-                      setNewData({ ...newData, name: e.target.value })
+                      setNewData({ ...newData, firstName: e.target.value })
                     }
                     disabled={!isEditing}
                     className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -166,9 +177,9 @@ export default function Profile() {
                   </Label>
                   <Input
                     id="lastName"
-                    value={newData.name}
+                    value={newData.lastName}
                     onChange={(e) =>
-                      setNewData({ ...newData, name: e.target.value })
+                      setNewData({ ...newData, lastName: e.target.value })
                     }
                     disabled={!isEditing}
                     className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -176,7 +187,7 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="space-y-2 grid grid-cols-3 ">
+              <div className="space-y-2 grid grid-cols-1 md:grid-cols-3 ">
                 <div className="col-span-2">
                   <Label htmlFor="email" className="text-sm font-medium">
                     Email Address
@@ -220,4 +231,9 @@ export default function Profile() {
       />
     </div>
   );
+}
+
+// TODO: create the update function
+const updateUserDetails = async () => {
+
 }
