@@ -11,7 +11,11 @@ import { Separator } from "@/components/ui/separator";
 import { Camera, Check, X, Edit3, Mail, Calendar } from "lucide-react";
 import { SettingSection } from "../shared/setting-section";
 import { useAuth } from "@/context/Auth";
-import { User } from "@/app/api/types";
+import { FieldsToUpdate, User } from "@/app/api/types";
+import { APIResponse, fetchRequest, logError } from "@/app/api/helpers";
+import { auth } from "@/firebaseConfig";
+import { toast } from "sonner";
+import { isEqual } from "lodash";
 
 //TODO Add users should be able to add an avatar
 export default function Profile() {
@@ -42,9 +46,43 @@ export default function Profile() {
   // })
   console.log({lastName: user.lastName})
   
-  const handleSave = () => {
-    // Handle save logic here
-    setIsEditing(false);
+  const handleSave = async () => {
+    const unchanged = isSameInfo(
+      { firstName: user.firstName, lastName: user.lastName },
+      { firstName: newData.firstName, lastName: newData.lastName }
+    );
+    console.log({unchanged})
+    if (unchanged) {
+      setIsEditing(false);
+      return;
+    }
+
+    try {
+      const res = await updateUserDetails({ //TODO Use the response to update the global user object
+        firstName: newData.firstName,
+        lastName: newData.lastName,
+      });
+
+      setIsEditing(false);
+
+      if (!res) {
+        toast.error("Failed to update user details");
+
+      } else {
+        console.log({res})
+        toast.success("User details updated successfully");
+      }
+
+    } catch (error) {
+      logError({
+        context: "Updating user details",
+        error,
+        message: "Failed to update user details",
+        logLevel: "error",
+      });
+
+      toast.error("Failed to update user details");
+    }
   };
 
   const handleCancel = () => {
@@ -199,7 +237,7 @@ export default function Profile() {
                     onChange={(e) =>
                       setNewData({ ...newData, email: e.target.value })
                     }
-                    disabled={!isEditing}
+                    disabled={true} //TODO Users should be able to change their email
                     className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -234,6 +272,24 @@ export default function Profile() {
 }
 
 // TODO: create the update function
-const updateUserDetails = async () => {
+const updateUserDetails = async (fields: FieldsToUpdate): Promise<User|undefined> => {
+  console.log("updattteee 1")
+  const token = await auth.currentUser?.getIdToken();
+  const res = await fetchRequest<APIResponse<User>>("/api/users", {
+    method:"PATCH",
+    headers: {
+      token: token || "",
+    },
+    body: { fields },
+  });
 
+  return res.data;
+};
+
+type UserInfo = {
+  firstName: string;
+  lastName: string;
+}
+const isSameInfo = (prev:UserInfo, update: UserInfo ) => {
+  return isEqual(prev, update)
 }

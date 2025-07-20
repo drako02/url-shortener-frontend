@@ -77,3 +77,13 @@ export interface UrlQuery {
   sortOrder?: "desc" | "asc";
   uid: string;
 }
+
+export type FieldsToUpdate =
+  | {
+      firstName: string;
+      lastName?: string;
+    }
+  | {
+      firstName?: string;
+      lastName: string;
+    };
