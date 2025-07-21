@@ -16,8 +16,10 @@ import { APIResponse, fetchRequest, logError } from "@/app/api/helpers";
 import { auth } from "@/firebaseConfig";
 import { toast } from "sonner";
 import { isEqual } from "lodash";
+import { format } from "date-fns";
 
 //TODO Add users should be able to add an avatar
+// TODO Users should be able to change their emails and password
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [newData, setNewData] = useState({
@@ -45,17 +47,20 @@ export default function Profile() {
   //   setFormData({na})
   // })
   console.log({lastName: user.lastName})
-  
-  const handleSave = async () => {
-    const unchanged = isSameInfo(
+
+  const saveButtonDisabled =
+    isSameInfo(
       { firstName: user.firstName, lastName: user.lastName },
       { firstName: newData.firstName, lastName: newData.lastName }
-    );
-    console.log({unchanged})
-    if (unchanged) {
-      setIsEditing(false);
-      return;
-    }
+    ) ||
+    (!newData.firstName && !newData.lastName);
+  
+  const handleSave = async () => {
+    // console.log({unchanged})
+    // if (unchanged) {
+    //   setIsEditing(false);
+    //   return;
+    // }
 
     try {
       const res = await updateUserDetails({ //TODO Use the response to update the global user object
@@ -136,9 +141,6 @@ export default function Profile() {
                   {/* {newData.firstName + " " + newData.lastName} */}
                   {user.firstName + " " + user.lastName}
                 </h1>
-                <Badge variant="secondary" className="px-2 py-1">
-                  Pro User
-                </Badge>
               </div>
               {/* <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                 {formData.bio}
@@ -150,7 +152,7 @@ export default function Profile() {
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  Member since Jan 2024
+                  Member since {format(user.joinedAt, "MMM yyy")}
                 </div>
               </div>
             </div>
@@ -247,6 +249,7 @@ export default function Profile() {
             {isEditing && (
               <div className="flex gap-3 pt-2">
                 <Button
+                disabled={saveButtonDisabled}
                   onClick={handleSave}
                   className="gap-2 bg-green-600 hover:bg-green-700 focus:ring-green-500"
                 >
