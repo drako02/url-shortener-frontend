@@ -160,14 +160,18 @@ export const useDashboardData = () => {
   }, [user?.id]);
 
   const getLast7DaysAnalytics = useCallback(async () => {
+    if (!user) return;
+
     try {
       dispatch({ type: "GET_LAST_7_DAYS_ANALYTICS_START" });
-      const last7DaysClicks = await getClicksFromLast7Days(user?.id);
+
+      const last7DaysClicks = await getClicksFromLast7Days(user.id);
       const chartData = getChartData(last7DaysClicks);
       dispatch({
         type: "GET_LAST_7_DAYS_ANALYTICS_SUCCESS",
         payload: chartData,
       });
+
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to fetch analytics";
@@ -175,10 +179,11 @@ export const useDashboardData = () => {
         type: "GET_LAST_7_DAYS_ANALYTICS_ERROR",
         payload: errorMessage,
       });
+
       toast.error(errorMessage);
       console.error(error);
     }
-  }, [user?.id]);
+  }, [user]);
 
   useEffect(() => {
     if (!user?.id) {
