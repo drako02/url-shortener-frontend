@@ -18,7 +18,7 @@ jest.mock('@/context/Auth', () => ({
 }));
 
 jest.mock('@/lib/utils', () => ({
-    safeFetch: jest.fn((callback, _) => callback()),
+    safeFetch: jest.fn((callback, ) => callback()),
 }));
 
 describe('usePaginatedUrls', () => {

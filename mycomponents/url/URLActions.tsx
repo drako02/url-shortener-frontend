@@ -12,9 +12,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { boolean } from "zod";
 import { auth } from "@/firebaseConfig";
-import { APIError, APIResponse, fetchRequest } from "@/app/api/helpers";
+import { APIResponse, fetchRequest } from "@/app/api/helpers";
 import { Switch } from "@/components/ui/switch";
 
 export const Actions: React.FC<{

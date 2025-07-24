@@ -1,5 +1,5 @@
 "use client";
-import { fetchRequest, logError, mapToURL, URL_SERVICE_API_BASE_URL } from "@/app/api/helpers";
+import {  mapToURL, URL_SERVICE_API_BASE_URL } from "@/app/api/helpers";
 import { ShortUrl, URLResponse } from "@/app/api/types";
 import { useUrls } from "@/context/_Urls";
 import { Button } from "@/components/ui/button";
@@ -7,12 +7,10 @@ import { SearchInput } from "@/mycomponents/input/searchInput";
 import { TableComponent } from "@/mycomponents/table/table";
 import {
   BodyCellProps,
-  HeaderContentProps,
   RowContentProps,
 } from "@/mycomponents/table/types";
-import { format, formatDistance } from "date-fns";
-import { Link as LinkIcon, RefreshCw, Info, PointerIcon } from "lucide-react";
-import Link from "next/link";
+import { format } from "date-fns";
+import { Link as LinkIcon, RefreshCw, Info } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Actions } from "../url/URLActions";

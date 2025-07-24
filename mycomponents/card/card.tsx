@@ -1,11 +1,10 @@
 import { URL_SERVICE_API_BASE_URL } from "@/app/api/helpers";
 import { ShortUrl } from "@/app/api/types";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useMemo } from "react";
-import { ExternalLink, Copy } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface URLCardProps {
