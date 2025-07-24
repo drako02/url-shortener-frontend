@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -52,7 +52,7 @@ export default function Dashboard() {
 
   console.log({providerUrls, dashboardTableURls})
 
-  const { topClicked, totalActiveLinks, totalUrls, totalClicks, last7DaysAnalytics } = useDashboardData();
+  const { totalActiveLinks, totalUrls, totalClicks, last7DaysAnalytics } = useDashboardData();
 
   return (
     <div className="py-8 mx-3">

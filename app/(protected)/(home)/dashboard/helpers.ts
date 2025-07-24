@@ -3,7 +3,6 @@ import { ClicksResponse } from "@/app/api/types";
 import { getShortUrls } from "@/app/api/urls/urls";
 import { useAuth } from "@/context/Auth";
 import { auth } from "@/firebaseConfig";
-import { format } from "date-fns";
 import { useReducer, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 

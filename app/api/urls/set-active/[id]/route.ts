@@ -3,7 +3,6 @@ import {
   APIError,
   APIResponse,
   fetchRequest,
-  logError,
   URL_SERVICE_API_BASE_URL,
 } from "../../../helpers";
 

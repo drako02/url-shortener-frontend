@@ -1,4 +1,3 @@
-import { auth } from "@/firebaseConfig";
 import { URLResponse, ShortUrl, User, UserResponse } from "./types";
 import qs from "qs";
 

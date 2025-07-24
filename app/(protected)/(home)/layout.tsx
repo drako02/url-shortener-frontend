@@ -12,7 +12,6 @@ import {
   Link,
   PlusCircle,
   Settings,
-  User,
   LogOut,
 } from "lucide-react";
 import { MainHeader } from "@/mycomponents/headers/header";

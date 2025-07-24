@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { APIResponse, fetchRequest, URL_SERVICE_API_BASE_URL } from "../../../helpers";
 import { PUT } from "./route";
-import { headers } from "next/headers";
 
 jest.mock("next/server", () => {
   return { NextRequest: jest.fn(), NextResponse: { json: jest.fn() } };

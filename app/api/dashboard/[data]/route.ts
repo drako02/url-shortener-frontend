@@ -9,7 +9,6 @@ import {
 } from "../../helpers";
 import { ClicksResponse } from "../../types";
 import { logError } from "../../helpers";
-import { buildFilterQuery } from "@/lib/utils";
 import { FilterProps } from "@/app/types";
 /**
  *
