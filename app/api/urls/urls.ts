@@ -1,5 +1,6 @@
 import { auth } from "@/firebaseConfig";
 import { URL_SERVICE_API_BASE_URL, fetchRequest } from "../helpers";
+import { URLResponse } from "../types";
 
 export const createShortUrl = async (url: string, uid: string) => {
   try {
@@ -30,14 +31,7 @@ export const getShortUrls = async (
   try {
     const res = fetchRequest<{
       recordCount: number;
-      urls: {
-        id: number;
-        short_code: string;
-        long_url: string;
-        created_at: string;
-        updated_at: string;
-        user_id: number;
-      }[];
+      urls: URLResponse[];
     }>(`${URL_SERVICE_API_BASE_URL}/user-urls`, {
       method: "POST",
       body: { uid, limit, offset },

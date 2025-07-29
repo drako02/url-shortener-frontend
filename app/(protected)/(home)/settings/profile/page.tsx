@@ -47,7 +47,7 @@ export default function Profile() {
   console.log({lastName: user.lastName})
 
   const saveButtonDisabled =
-    isSameInfo(
+    isEqual(
       { firstName: user.firstName, lastName: user.lastName },
       { firstName: newData.firstName, lastName: newData.lastName }
     ) ||
@@ -287,10 +287,10 @@ const updateUserDetails = async (fields: FieldsToUpdate): Promise<User|undefined
   return res.data;
 };
 
-type UserInfo = {
-  firstName: string;
-  lastName: string;
-}
-const isSameInfo = (prev:UserInfo, update: UserInfo ) => {
-  return isEqual(prev, update)
-}
+// type UserInfo = {
+//   firstName: string;
+//   lastName: string;
+// }
+// const isSameInfo = (prev:UserInfo, update: UserInfo ) => {
+//   return isEqual(prev, update)
+// }

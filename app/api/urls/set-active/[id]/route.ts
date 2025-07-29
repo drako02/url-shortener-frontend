@@ -32,7 +32,7 @@ export async function PUT(request: NextRequest, {params}: {params: {id: string}}
     const active = statusParam === "true";
 
 
-    const res = await fetchRequest(`${URL_SERVICE_API_BASE_URL}/urls/set-active`, {
+    const res = await fetchRequest<{message:string}>(`${URL_SERVICE_API_BASE_URL}/urls/set-active`, {
       method: "PUT",
       headers: {
         Authorization: token,
@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest, {params}: {params: {id: string}}
       body: { id: Number(id), value: active },
     });
     return NextResponse.json<APIResponse<null>>(
-      { success: true , message: res?.message},
+      { success: true , message: res.message},
       { status: 200 }
     );
     

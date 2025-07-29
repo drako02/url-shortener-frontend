@@ -77,7 +77,7 @@ export default function Dashboard() {
         <CardContent>
           <div className="h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={last7DaysAnalytics}>
+              <BarChart data={last7DaysAnalytics || []}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
