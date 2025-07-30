@@ -33,7 +33,7 @@ export async function GET(
 ) {
   try {
     const authHeader = request.headers.get("authorization");
-    const data = (await params).data;
+    const data = params.data;
     const userId = request.nextUrl.searchParams.get("userId");
     // if (!userId && data !== "active") {
     //   return NextResponse.json<APIResponse<null>>(
