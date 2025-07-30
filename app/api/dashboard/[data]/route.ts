@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getShortUrls } from "../../urls/urls";
+// import { getShortUrls } from "../../urls/urls";
 import {
   ANALYTICS_SERVICE_BASE_URL,
   APIError,
   APIResponse,
   fetchRequest,
-  mapToURL,
+  // mapToURL,
   URL_SERVICE_API_BASE_URL,
 } from "../../helpers";
 import { ClicksResponse } from "../../types";
@@ -51,27 +51,27 @@ export async function GET(
 
     console.log("dataaaa: ", data);
     switch (data) {
-      case "urls":
-        if (!userId) {
-          return NextResponse.json<APIResponse<null>>(
-            {
-              success: false,
-              errors: {
-                "Invalid Request": ["userId was not defined in query params"],
-              },
-            },
-            { status: 400 }
-          );
-        }
+      // case "urls":
+      //   if (!userId) {
+      //     return NextResponse.json<APIResponse<null>>(
+      //       {
+      //         success: false,
+      //         errors: {
+      //           "Invalid Request": ["userId was not defined in query params"],
+      //         },
+      //       },
+      //       { status: 400 }
+      //     );
+      //   }
 
-        const userUrlsData = await fetchUserUrls(userId);
-        return NextResponse.json<APIResponse<unknown>>(
-          {
-            data: { ...userUrlsData },
-            success: true,
-          },
-          { status: 200 }
-        );
+      //   const userUrlsData = await fetchUserUrls(userId);
+      //   return NextResponse.json<APIResponse<unknown>>(
+      //     {
+      //       data: { ...userUrlsData },
+      //       success: true,
+      //     },
+      //     { status: 200 }
+      //   );
 
       case "clicks":
         if (!userId) {
@@ -219,11 +219,11 @@ export async function GET(
   }
 }
 
-const fetchUserUrls = async (uid: string) => {
-  const res = await getShortUrls(uid, 0, 0);
-  const formattedUrls = res.urls.map((url) => mapToURL(url));
-  return { totalUrls: res.recordCount, urls: formattedUrls };
-};
+// const fetchUserUrls = async (uid: string) => {
+//   const res = await getShortUrls(uid, 0, 0);
+//   const formattedUrls = res.urls.map((url) => mapToURL(url));
+//   return { totalUrls: res.recordCount, urls: formattedUrls };
+// };
 
 const fetchUserTotalClicks = async (uid: string) => {
   const res = await fetchRequest<ClicksResponse[]>(
